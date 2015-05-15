@@ -113,7 +113,7 @@ public class ChamRenderLL
         double vStart = (state.renderMinZ + state.shiftV + rangeZ) % 1.0;
         double vStop = (state.renderMaxZ + state.shiftV + rangeZ) % 1.0;
 
-        setupUVPoints(uStart, vStart, uStop, vStop, rangeX, rangeZ, icon);
+        setupUVPoints(uStart, vStart, uStop, vStop, rangeX, rangeZ);
         setupAOBrightnessLerp(state.renderMinX, state.renderMaxX, state.renderMinZ, state.renderMaxZ, rangeX, rangeZ);
 
         int rotate = (face == 0) ? state.uvRotate[0] : state.uvRotate[1];
@@ -181,7 +181,7 @@ public class ChamRenderLL
         double vStart = (state.renderMinY + state.shiftV + rangeY) % 1.0;
         double vStop = (state.renderMaxY + state.shiftV + rangeY) % 1.0;
 
-        setupUVPoints(uStart, vStart, uStop, vStop, rangeX, rangeY, icon);
+        setupUVPoints(uStart, vStart, uStop, vStop, rangeX, rangeY);
         setupAOBrightnessLerp(state.renderMinX, state.renderMaxX, state.renderMinY, state.renderMaxY, rangeX, rangeY);
 
         for (int ix = 0; ix < rangeX; ix++) {
@@ -196,7 +196,11 @@ public class ChamRenderLL
                 state.brightnessBottomLeft = brightnessLerp[ix][iy + 1];
                 state.brightnessBottomRight = brightnessLerp[ix + 1][iy + 1];
 
-                setUV(icon, minUDiv[ix], minVDiv[iy], maxUDiv[ix], maxVDiv[iy]);
+                if (state.flipTexture)
+                    setUV(icon, 1 - minUDiv[ix], minVDiv[iy], 1 - maxUDiv[ix], maxVDiv[iy]);
+                else
+                    setUV(icon, minUDiv[ix], minVDiv[iy], maxUDiv[ix], maxVDiv[iy]);
+
                 renderXYZUVAO(xyzuvMap[face]);
 
                 xyz[MINY] = xyz[MAXY];
@@ -215,7 +219,7 @@ public class ChamRenderLL
             xyz[MAXZ] = z + state.renderMinZ;
         }
 
-        if (rangeZ <= 1 && rangeZ <= 1) {
+        if (rangeZ <= 1 && rangeY <= 1) {
 
             if (state.flipTexture)
                 setUV(icon, state.renderMaxZ + state.shiftU, 1 - state.renderMaxY + state.shiftV, state.renderMinZ + state.shiftU, 1 - state.renderMinY + state.shiftV);
@@ -234,7 +238,7 @@ public class ChamRenderLL
         double vStart = (state.renderMinY + state.shiftV + rangeY) % 1.0;
         double vStop = (state.renderMaxY + state.shiftV + rangeY) % 1.0;
 
-        setupUVPoints(uStart, vStart, uStop, vStop, rangeZ, rangeY, icon);
+        setupUVPoints(uStart, vStart, uStop, vStop, rangeZ, rangeY);
         setupAOBrightnessLerp(state.renderMinZ, state.renderMaxZ, state.renderMinY, state.renderMaxY, rangeZ, rangeY);
 
         for (int iz = 0; iz < rangeZ; iz++) {
@@ -250,9 +254,9 @@ public class ChamRenderLL
                 state.brightnessBottomRight = brightnessLerp[iz + 1][iy + 1];
 
                 if (state.flipTexture)
-                    setUV(1 - minUDiv[iz], minVDiv[iy], 1 - maxUDiv[iz], maxVDiv[iy]);
+                    setUV(icon, 1 - minUDiv[iz], minVDiv[iy], 1 - maxUDiv[iz], maxVDiv[iy]);
                 else
-                    setUV(minUDiv[iz], minVDiv[iy], maxUDiv[iz], maxVDiv[iy]);
+                    setUV(icon, minUDiv[iz], minVDiv[iy], maxUDiv[iz], maxVDiv[iy]);
 
                 renderXYZUVAO(xyzuvMap[face]);
 
@@ -272,7 +276,7 @@ public class ChamRenderLL
             renderXYZUV(xyzuvMap[face]);
     }
 
-    private void setupUVPoints (double uStart, double vStart, double uStop, double vStop, int rangeU, int rangeV, TextureAtlasSprite icon) {
+    private void setupUVPoints (double uStart, double vStart, double uStop, double vStop, int rangeU, int rangeV) {
         if (rangeU <= 1) {
             minUDiv[0] = uStart;
             maxUDiv[0] = uStop;
