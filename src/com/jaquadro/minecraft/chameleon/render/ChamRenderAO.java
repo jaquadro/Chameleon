@@ -12,8 +12,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class ChamRenderAO
 {
-    /*
-    private RenderHelperState state;
+    private ChamRenderState state;
 
     private int aoBrightnessXYNI;
     private int aoBrightnessYZIN;
@@ -109,7 +108,7 @@ public class ChamRenderAO
     private float aoLightValueScratchXYZIPN;
     private float aoLightValueScratchXYZIPP;
 
-    public RenderHelperAO (RenderHelperState state) {
+    public ChamRenderAO (ChamRenderState state) {
         this.state = state;
     }
 
@@ -117,14 +116,13 @@ public class ChamRenderAO
         WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
         tessellator.setBrightness(983055);
 
-        //int yGrass = (state.renderMinY <= 0) ? y - 1 : y;
         BlockPos posDown = pos.down();
         BlockPos posGrass = (state.renderMinY <= 0) ? posDown : pos;
 
-        boolean blocksGrassXYPN = !blockAccess.getBlockState(posGrass.east()).getBlock().getCanBlockGrass();
-        boolean blocksGrassXYNN = !blockAccess.getBlockState(posGrass.west()).getBlock().getCanBlockGrass();
-        boolean blocksGrassYZNP = !blockAccess.getBlockState(posGrass.south()).getBlock().getCanBlockGrass();
-        boolean blocksGrassYZNN = !blockAccess.getBlockState(posGrass.north()).getBlock().getCanBlockGrass();
+        boolean blocksGrassXYPN = !blockAccess.getBlockState(posGrass.east()).getBlock().isTranslucent();
+        boolean blocksGrassXYNN = !blockAccess.getBlockState(posGrass.west()).getBlock().isTranslucent();
+        boolean blocksGrassYZNP = !blockAccess.getBlockState(posGrass.south()).getBlock().isTranslucent();
+        boolean blocksGrassYZNN = !blockAccess.getBlockState(posGrass.north()).getBlock().isTranslucent();
 
         if (state.renderMinY > 0)
             setupAOBrightnessYNeg(blockAccess, block, pos, blocksGrassXYPN, blocksGrassXYNN, blocksGrassYZNP, blocksGrassYZNN);
@@ -166,83 +164,50 @@ public class ChamRenderAO
         state.scaleColor(state.colorTopRight, aoTR);
     }
 
-    public void setupYPosAOPartial (IBlockAccess blockAccess, Block block, int x, int y, int z, float r, float g, float b) {
+    public void setupYPosAOPartial (IBlockAccess blockAccess, Block block, BlockPos pos, float r, float g, float b) {
         WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
         tessellator.setBrightness(983055);
 
-        if (state.renderMaxY >= 1.0D)
-            ++y;
+        BlockPos posUp = pos.up();
+        BlockPos posGrass = (state.renderMaxY >= 1) ? posUp : pos;
 
-        aoBrightnessXYNP = block.getMixedBrightnessForBlock(blockAccess, x - 1, y, z);
-        aoBrightnessXYPP = block.getMixedBrightnessForBlock(blockAccess, x + 1, y, z);
-        aoBrightnessYZPN = block.getMixedBrightnessForBlock(blockAccess, x, y, z - 1);
-        aoBrightnessYZPP = block.getMixedBrightnessForBlock(blockAccess, x, y, z + 1);
-        aoBrightnessXYZNPN = aoBrightnessXYNP;
-        aoBrightnessXYZPPN = aoBrightnessXYPP;
-        aoBrightnessXYZNPP = aoBrightnessXYNP;
-        aoBrightnessXYZPPP = aoBrightnessXYPP;
+        boolean blocksGrassXYNP = !blockAccess.getBlockState(posGrass.west()).getBlock().isTranslucent();
+        boolean blocksGrassXYPP = !blockAccess.getBlockState(posGrass.east()).getBlock().isTranslucent();
+        boolean blocksGrassYZPN = !blockAccess.getBlockState(posGrass.north()).getBlock().isTranslucent();
+        boolean blocksGrassYZPP = !blockAccess.getBlockState(posGrass.south()).getBlock().isTranslucent();
 
-        aoLightValueScratchXYNP = blockAccess.getBlock(x - 1, y, z).getAmbientOcclusionLightValue();
-        aoLightValueScratchXYPP = blockAccess.getBlock(x + 1, y, z).getAmbientOcclusionLightValue();
-        aoLightValueScratchYZPN = blockAccess.getBlock(x, y, z - 1).getAmbientOcclusionLightValue();
-        aoLightValueScratchYZPP = blockAccess.getBlock(x, y, z + 1).getAmbientOcclusionLightValue();
-        aoLightValueScratchXYZNPN = aoLightValueScratchXYNP;
-        aoLightValueScratchXYZPPN = aoLightValueScratchXYPP;
-        aoLightValueScratchXYZNPP = aoLightValueScratchXYNP;
-        aoLightValueScratchXYZPPP = aoLightValueScratchXYPP;
+        if (state.renderMaxY < 1)
+            setupAOBrightnessYPos(blockAccess, block, pos, blocksGrassXYPP, blocksGrassXYNP, blocksGrassYZPP, blocksGrassYZPN);
 
-        boolean blocksGrassXYPP = blockAccess.getBlock(x + 1, y + 1, z).getCanBlockGrass();
-        boolean blocksGrassXYNP = blockAccess.getBlock(x - 1, y + 1, z).getCanBlockGrass();
-        boolean blocksGrassYZPP = blockAccess.getBlock(x, y + 1, z + 1).getCanBlockGrass();
-        boolean blocksGrassYZPN = blockAccess.getBlock(x, y + 1, z - 1).getCanBlockGrass();
+        setupAOBrightnessYNeg(blockAccess, block, posUp, blocksGrassXYPP, blocksGrassXYNP, blocksGrassYZPP, blocksGrassYZPN);
 
-        if (blocksGrassYZPN || blocksGrassXYNP) {
-            aoLightValueScratchXYZNPN = blockAccess.getBlock(x - 1, y, z - 1).getAmbientOcclusionLightValue();
-            aoBrightnessXYZNPN = block.getMixedBrightnessForBlock(blockAccess, x - 1, y, z - 1);
-        }
+        float yClamp = MathHelper.clamp_float((float) state.renderMaxY, 0, 1);
+        mixAOBrightnessLightValueY(yClamp, 1 - yClamp);
 
-        if (blocksGrassYZPN || blocksGrassXYPP) {
-            aoLightValueScratchXYZPPN = blockAccess.getBlock(x + 1, y, z - 1).getAmbientOcclusionLightValue();
-            aoBrightnessXYZPPN = block.getMixedBrightnessForBlock(blockAccess, x + 1, y, z - 1);
-        }
+        int blockBrightness = block.getMixedBrightnessForBlock(blockAccess, pos);
+        if (state.renderMaxY >= 1.0D || !blockAccess.getBlockState(posUp).getBlock().isOpaqueCube())
+            blockBrightness = block.getMixedBrightnessForBlock(blockAccess, posUp);
 
-        if (blocksGrassYZPP || blocksGrassXYNP) {
-            aoLightValueScratchXYZNPP = blockAccess.getBlock(x - 1, y, z + 1).getAmbientOcclusionLightValue();
-            aoBrightnessXYZNPP = block.getMixedBrightnessForBlock(blockAccess, x - 1, y, z + 1);
-        }
-
-        if (blocksGrassYZPP || blocksGrassXYPP) {
-            aoLightValueScratchXYZPPP = blockAccess.getBlock(x + 1, y, z + 1).getAmbientOcclusionLightValue();
-            aoBrightnessXYZPPP = block.getMixedBrightnessForBlock(blockAccess, x + 1, y, z + 1);
-        }
-
-        if (state.renderMaxY >= 1.0D)
-            --y;
-
-        int blockBrightness = block.getMixedBrightnessForBlock(blockAccess, x, y, z);
-        if (state.renderMaxY >= 1.0D || !blockAccess.getBlock(x, y + 1, z).isOpaqueCube())
-            blockBrightness = block.getMixedBrightnessForBlock(blockAccess, x, y + 1, z);
-
-        float aoOpposingBlock = blockAccess.getBlock(x, y + 1, z).getAmbientOcclusionLightValue();
-        float aoXYZNPN = (aoLightValueScratchXYZNPP + aoLightValueScratchXYNP + aoLightValueScratchYZPP + aoOpposingBlock) / 4.0F;  // TR
-        float aoXYZNPP = (aoLightValueScratchYZPP + aoOpposingBlock + aoLightValueScratchXYZPPP + aoLightValueScratchXYPP) / 4.0F;  // TL
-        float aoXYZPPP = (aoOpposingBlock + aoLightValueScratchYZPN + aoLightValueScratchXYPP + aoLightValueScratchXYZPPN) / 4.0F;  // BL
-        float aoXYZPPN = (aoLightValueScratchXYNP + aoLightValueScratchXYZNPN + aoOpposingBlock + aoLightValueScratchYZPN) / 4.0F;  // BR
+        float aoOpposingBlock = blockAccess.getBlockState(posUp).getBlock().getAmbientOcclusionLightValue();
+        float aoXYZNPN = (aoLightValueScratchXYZNIP + aoLightValueScratchXYNI + aoLightValueScratchYZIP + aoOpposingBlock) / 4.0F;  // TR
+        float aoXYZNPP = (aoLightValueScratchYZIP + aoOpposingBlock + aoLightValueScratchXYZPIP + aoLightValueScratchXYPI) / 4.0F;  // TL
+        float aoXYZPPP = (aoOpposingBlock + aoLightValueScratchYZIN + aoLightValueScratchXYPI + aoLightValueScratchXYZPIN) / 4.0F;  // BL
+        float aoXYZPPN = (aoLightValueScratchXYNI + aoLightValueScratchXYZNIN + aoOpposingBlock + aoLightValueScratchYZIN) / 4.0F;  // BR
 
         float aoTL = (float)((double)aoXYZPPP * state.renderMaxX * (1.0D - state.renderMaxZ) + (double)aoXYZNPP * state.renderMaxX * state.renderMaxZ + (double)aoXYZNPN * (1.0D - state.renderMaxX) * state.renderMaxZ + (double)aoXYZPPN * (1.0D - state.renderMaxX) * (1.0D - state.renderMaxZ));
         float aoBL = (float)((double)aoXYZPPP * state.renderMaxX * (1.0D - state.renderMinZ) + (double)aoXYZNPP * state.renderMaxX * state.renderMinZ + (double)aoXYZNPN * (1.0D - state.renderMaxX) * state.renderMinZ + (double)aoXYZPPN * (1.0D - state.renderMaxX) * (1.0D - state.renderMinZ));
         float aoBR = (float)((double)aoXYZPPP * state.renderMinX * (1.0D - state.renderMinZ) + (double)aoXYZNPP * state.renderMinX * state.renderMinZ + (double)aoXYZNPN * (1.0D - state.renderMinX) * state.renderMinZ + (double)aoXYZPPN * (1.0D - state.renderMinX) * (1.0D - state.renderMinZ));
         float aoTR = (float)((double)aoXYZPPP * state.renderMinX * (1.0D - state.renderMaxZ) + (double)aoXYZNPP * state.renderMinX * state.renderMaxZ + (double)aoXYZNPN * (1.0D - state.renderMinX) * state.renderMaxZ + (double)aoXYZPPN * (1.0D - state.renderMinX) * (1.0D - state.renderMaxZ));
 
-        int brXYZPPN = getAOBrightness(aoBrightnessXYNP, aoBrightnessXYZNPP, aoBrightnessYZPP, blockBrightness);
-        int brXYZNPN = getAOBrightness(aoBrightnessYZPP, aoBrightnessXYPP, aoBrightnessXYZPPP, blockBrightness);
-        int brXYZNPP = getAOBrightness(aoBrightnessYZPN, aoBrightnessXYZPPN, aoBrightnessXYPP, blockBrightness);
-        int brXYZPPP = getAOBrightness(aoBrightnessXYZNPN, aoBrightnessXYNP, aoBrightnessYZPN, blockBrightness);
+        int brXYZPPN = getAOBrightness(aoBrightnessXYNI, aoBrightnessXYZNIP, aoBrightnessYZIP, blockBrightness);
+        int brXYZNPN = getAOBrightness(aoBrightnessYZIP, aoBrightnessXYIP, aoBrightnessXYZPIP, blockBrightness);
+        int brXYZNPP = getAOBrightness(aoBrightnessYZIN, aoBrightnessXYZPIN, aoBrightnessXYPI, blockBrightness);
+        int brXYZPPP = getAOBrightness(aoBrightnessXYZNIN, aoBrightnessXYNI, aoBrightnessYZIN, blockBrightness);
 
-        state.brightnessTopLeft = mixAOBrightness(brXYZPPP, brXYZPPN, brXYZNPN, brXYZNPP, state.renderMaxZ, state.renderMaxX);
-        state.brightnessBottomLeft = mixAOBrightness(brXYZPPP, brXYZPPN, brXYZNPN, brXYZNPP, state.renderMinZ, state.renderMaxX);
-        state.brightnessBottomRight = mixAOBrightness(brXYZPPP, brXYZPPN, brXYZNPN, brXYZNPP, state.renderMinZ, state.renderMinX);
-        state.brightnessTopRight = mixAOBrightness(brXYZPPP, brXYZPPN, brXYZNPN, brXYZNPP, state.renderMaxZ, state.renderMinX);
+        state.brightnessTopLeft = mixAOBrightness(brXYZPPP, brXYZNPP, brXYZNPN, brXYZPPN, state.renderMaxX * (1.0D - state.renderMaxZ), state.renderMaxX * state.renderMaxZ, (1.0D - state.renderMaxX) * state.renderMaxZ, (1.0D - state.renderMaxX) * (1.0D - state.renderMaxZ));
+        state.brightnessBottomLeft = mixAOBrightness(brXYZPPP, brXYZNPP, brXYZNPN, brXYZPPN, state.renderMaxX * (1.0D - state.renderMinZ), state.renderMaxX * state.renderMinZ, (1.0D - state.renderMaxX) * state.renderMinZ, (1.0D - state.renderMaxX) * (1.0D - state.renderMinZ));
+        state.brightnessBottomRight = mixAOBrightness(brXYZPPP, brXYZNPP, brXYZNPN, brXYZPPN, state.renderMinX * (1.0D - state.renderMinZ), state.renderMinX * state.renderMinZ, (1.0D - state.renderMinX) * state.renderMinZ, (1.0D - state.renderMinX) * (1.0D - state.renderMinZ));
+        state.brightnessTopRight = mixAOBrightness(brXYZPPP, brXYZNPP, brXYZNPN, brXYZPPN, state.renderMinX * (1.0D - state.renderMaxZ), state.renderMinX * state.renderMaxZ, (1.0D - state.renderMinX) * state.renderMaxZ, (1.0D - state.renderMinX) * (1.0D - state.renderMaxZ));
 
         state.setColor(r * state.colorMultYPos, g * state.colorMultYPos, b * state.colorMultYPos);
         state.scaleColor(state.colorTopLeft, aoTL);
@@ -251,30 +216,31 @@ public class ChamRenderAO
         state.scaleColor(state.colorTopRight, aoTR);
     }
 
-    public void setupZNegAOPartial (IBlockAccess blockAccess, Block block, int x, int y, int z, float r, float g, float b) {
+    public void setupZNegAOPartial (IBlockAccess blockAccess, Block block, BlockPos pos, float r, float g, float b) {
         WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
         tessellator.setBrightness(983055);
 
-        int zGrass = (state.renderMinZ <= 0) ? z - 1 : z;
+        BlockPos posNorth = pos.north();
+        BlockPos posGrass = (state.renderMinZ <= 0) ? posNorth : pos;
 
-        boolean blocksGrassXZPN = !blockAccess.getBlock(x + 1, y, zGrass).getCanBlockGrass();
-        boolean blocksGrassXZNN = !blockAccess.getBlock(x - 1, y, zGrass).getCanBlockGrass();
-        boolean blocksGrassYZPN = !blockAccess.getBlock(x, y + 1, zGrass).getCanBlockGrass();
-        boolean blocksGrassYZNN = !blockAccess.getBlock(x, y - 1, zGrass).getCanBlockGrass();
+        boolean blocksGrassXZPN = !blockAccess.getBlockState(posGrass.east()).getBlock().isTranslucent();
+        boolean blocksGrassXZNN = !blockAccess.getBlockState(posGrass.west()).getBlock().isTranslucent();
+        boolean blocksGrassYZPN = !blockAccess.getBlockState(posGrass.up()).getBlock().isTranslucent();
+        boolean blocksGrassYZNN = !blockAccess.getBlockState(posGrass.down()).getBlock().isTranslucent();
 
-        if (state.renderMinZ > 0)
-            setupAOBrightnessZNeg(blockAccess, block, x, y, z, blocksGrassXZPN, blocksGrassXZNN, blocksGrassYZPN, blocksGrassYZNN);
+        if (state.renderMaxZ > 0)
+            setupAOBrightnessZNeg(blockAccess, block, pos, blocksGrassXZPN, blocksGrassXZNN, blocksGrassYZPN, blocksGrassYZNN);
 
-        setupAOBrightnessZPos(blockAccess, block, x, y, z - 1, blocksGrassXZPN, blocksGrassXZNN, blocksGrassYZPN, blocksGrassYZNN);
+        setupAOBrightnessZPos(blockAccess, block, posNorth, blocksGrassXZPN, blocksGrassXZNN, blocksGrassYZPN, blocksGrassYZNN);
 
         float zClamp = MathHelper.clamp_float((float) state.renderMinZ, 0, 1);
         mixAOBrightnessLightValueZ(zClamp, 1 - zClamp);
 
-        int blockBrightness = block.getMixedBrightnessForBlock(blockAccess, x, y, z);
-        if (state.renderMinZ <= 0.0D || !blockAccess.getBlock(x, y, z - 1).isOpaqueCube())
-            blockBrightness = block.getMixedBrightnessForBlock(blockAccess, x, y, z - 1);
+        int blockBrightness = block.getMixedBrightnessForBlock(blockAccess, pos);
+        if (state.renderMinZ <= 0.0D || !blockAccess.getBlockState(posNorth).getBlock().isOpaqueCube())
+            blockBrightness = block.getMixedBrightnessForBlock(blockAccess, posNorth);
 
-        float aoOpposingBlock = blockAccess.getBlock(x, y, z - 1).getAmbientOcclusionLightValue();
+        float aoOpposingBlock = blockAccess.getBlockState(posNorth).getBlock().getAmbientOcclusionLightValue();
         float aoXYZNPN = (aoLightValueScratchXZNI + aoLightValueScratchXYZNPI + aoOpposingBlock + aoLightValueScratchYZPI) / 4.0F;
         float aoXYZPPN = (aoOpposingBlock + aoLightValueScratchYZPI + aoLightValueScratchXZPI + aoLightValueScratchXYZPPI) / 4.0F;
         float aoXYZPNN = (aoLightValueScratchYZNI + aoOpposingBlock + aoLightValueScratchXYZPNI + aoLightValueScratchXZPI) / 4.0F;
@@ -302,30 +268,31 @@ public class ChamRenderAO
         state.scaleColor(state.colorTopRight, aoTR);
     }
 
-    public void setupZPosAOPartial (IBlockAccess blockAccess, Block block, int x, int y, int z, float r, float g, float b) {
+    public void setupZPosAOPartial (IBlockAccess blockAccess, Block block, BlockPos pos, float r, float g, float b) {
         WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
         tessellator.setBrightness(983055);
 
-        int zGrass = (state.renderMaxZ >= 1) ? z + 1 : z;
+        BlockPos posSouth = pos.south();
+        BlockPos posGrass = (state.renderMaxZ >= 1) ? posSouth : pos;
 
-        boolean blocksGrassXZPP = !blockAccess.getBlock(x + 1, y, zGrass).getCanBlockGrass();
-        boolean blocksGrassXZNP = !blockAccess.getBlock(x - 1, y, zGrass).getCanBlockGrass();
-        boolean blocksGrassYZPP = !blockAccess.getBlock(x, y + 1, zGrass).getCanBlockGrass();
-        boolean blocksGrassYZNP = !blockAccess.getBlock(x, y - 1, zGrass).getCanBlockGrass();
+        boolean blocksGrassXZPP = !blockAccess.getBlockState(posGrass.east()).getBlock().isTranslucent();
+        boolean blocksGrassXZNP = !blockAccess.getBlockState(posGrass.west()).getBlock().isTranslucent();
+        boolean blocksGrassYZPP = !blockAccess.getBlockState(posGrass.up()).getBlock().isTranslucent();
+        boolean blocksGrassYZNP = !blockAccess.getBlockState(posGrass.down()).getBlock().isTranslucent();
 
         if (state.renderMaxZ < 1)
-            setupAOBrightnessZPos(blockAccess, block, x, y, z, blocksGrassXZPP, blocksGrassXZNP, blocksGrassYZPP, blocksGrassYZNP);
+            setupAOBrightnessZPos(blockAccess, block, pos, blocksGrassXZPP, blocksGrassXZNP, blocksGrassYZPP, blocksGrassYZNP);
 
-        setupAOBrightnessZNeg(blockAccess, block, x, y, z + 1, blocksGrassXZPP, blocksGrassXZNP, blocksGrassYZPP, blocksGrassYZNP);
+        setupAOBrightnessZNeg(blockAccess, block, posSouth, blocksGrassXZPP, blocksGrassXZNP, blocksGrassYZPP, blocksGrassYZNP);
 
         float zClamp = MathHelper.clamp_float((float) state.renderMaxZ, 0, 1);
         mixAOBrightnessLightValueZ(zClamp, 1 - zClamp);
 
-        int blockBrightness = block.getMixedBrightnessForBlock(blockAccess, x, y, z);
-        if (state.renderMaxZ >= 1.0D || !blockAccess.getBlock(x, y, z + 1).isOpaqueCube())
-            blockBrightness = block.getMixedBrightnessForBlock(blockAccess, x, y, z + 1);
+        int blockBrightness = block.getMixedBrightnessForBlock(blockAccess, pos);
+        if (state.renderMaxZ >= 1.0D || !blockAccess.getBlockState(posSouth).getBlock().isOpaqueCube())
+            blockBrightness = block.getMixedBrightnessForBlock(blockAccess, posSouth);
 
-        float aoOpposingBlock = blockAccess.getBlock(x, y, z + 1).getAmbientOcclusionLightValue();
+        float aoOpposingBlock = blockAccess.getBlockState(posSouth).getBlock().getAmbientOcclusionLightValue();
         float aoXYZNPP = (aoLightValueScratchXZNI + aoLightValueScratchXYZNPI + aoOpposingBlock + aoLightValueScratchYZPI) / 4.0F;
         float aoXYZPPP = (aoOpposingBlock + aoLightValueScratchYZPI + aoLightValueScratchXZPI + aoLightValueScratchXYZPPI) / 4.0F;
         float aoXYZPNP = (aoLightValueScratchYZNI + aoOpposingBlock + aoLightValueScratchXYZPNI + aoLightValueScratchXZPI) / 4.0F;
@@ -353,30 +320,31 @@ public class ChamRenderAO
         state.scaleColor(state.colorTopRight, aoTR);
     }
 
-    public void setupXNegAOPartial (IBlockAccess blockAccess, Block block, int x, int y, int z, float r, float g, float b) {
+    public void setupXNegAOPartial (IBlockAccess blockAccess, Block block, BlockPos pos, float r, float g, float b) {
         WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
         tessellator.setBrightness(983055);
 
-        int xGrass = (state.renderMinX <= 0) ? x - 1 : x;
+        BlockPos posWest = pos.west();
+        BlockPos posGrass = (state.renderMinX <= 0) ? posWest : pos;
 
-        boolean blocksGrassXYNP = !blockAccess.getBlock(xGrass, y + 1, z).getCanBlockGrass();
-        boolean blocksGrassXYNN = !blockAccess.getBlock(xGrass, y - 1, z).getCanBlockGrass();
-        boolean blocksGrassXZNN = !blockAccess.getBlock(xGrass, y, z - 1).getCanBlockGrass();
-        boolean blocksGrassXZNP = !blockAccess.getBlock(xGrass, y, z + 1).getCanBlockGrass();
+        boolean blocksGrassXYNP = !blockAccess.getBlockState(posGrass.up()).getBlock().isTranslucent();
+        boolean blocksGrassXYNN = !blockAccess.getBlockState(posGrass.down()).getBlock().isTranslucent();
+        boolean blocksGrassXZNN = !blockAccess.getBlockState(posGrass.north()).getBlock().isTranslucent();
+        boolean blocksGrassXZNP = !blockAccess.getBlockState(posGrass.south()).getBlock().isTranslucent();
 
         if (state.renderMinX > 0)
-            setupAOBrightnessXNeg(blockAccess, block, x, y, z, blocksGrassXYNP, blocksGrassXYNN, blocksGrassXZNN, blocksGrassXZNP);
+            setupAOBrightnessXNeg(blockAccess, block, pos, blocksGrassXYNP, blocksGrassXYNN, blocksGrassXZNN, blocksGrassXZNP);
 
-        setupAOBrightnessXPos(blockAccess, block, x - 1, y, z, blocksGrassXYNP, blocksGrassXYNN, blocksGrassXZNN, blocksGrassXZNP);
+        setupAOBrightnessXPos(blockAccess, block, posWest, blocksGrassXYNP, blocksGrassXYNN, blocksGrassXZNN, blocksGrassXZNP);
 
         float xClamp = MathHelper.clamp_float((float) state.renderMinX, 0, 1);
         mixAOBrightnessLightValueX(xClamp, 1 - xClamp);
 
-        int blockBrightness = block.getMixedBrightnessForBlock(blockAccess, x, y, z);
-        if (state.renderMinX <= 0.0D || !blockAccess.getBlock(x - 1, y, z).isOpaqueCube())
-            blockBrightness = block.getMixedBrightnessForBlock(blockAccess, x - 1, y, z);
+        int blockBrightness = block.getMixedBrightnessForBlock(blockAccess, pos);
+        if (state.renderMinX <= 0.0D || !blockAccess.getBlockState(posWest).getBlock().isOpaqueCube())
+            blockBrightness = block.getMixedBrightnessForBlock(blockAccess, posWest);
 
-        float aoOpposingBlock = blockAccess.getBlock(x - 1, y, z).getAmbientOcclusionLightValue();
+        float aoOpposingBlock = blockAccess.getBlockState(posWest).getBlock().getAmbientOcclusionLightValue();
         float aoXYZNNP = (aoLightValueScratchXYIN + aoLightValueScratchXYZINP + aoOpposingBlock + aoLightValueScratchXZIP) / 4.0F;
         float aoXYZNPP = (aoOpposingBlock + aoLightValueScratchXZIP + aoLightValueScratchXYIP + aoLightValueScratchXYZIPP) / 4.0F;
         float aoXYZNPN = (aoLightValueScratchXZIN + aoOpposingBlock + aoLightValueScratchXYZIPN + aoLightValueScratchXYIP) / 4.0F;
@@ -404,30 +372,31 @@ public class ChamRenderAO
         state.scaleColor(state.colorTopRight, aoTR);
     }
 
-    public void setupXPosAOPartial (IBlockAccess blockAccess, Block block, int x, int y, int z, float r, float g, float b) {
+    public void setupXPosAOPartial (IBlockAccess blockAccess, Block block, BlockPos pos, float r, float g, float b) {
         WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
         tessellator.setBrightness(983055);
 
-        int xGrass = (state.renderMaxX >= 1) ? x + 1 : x;
+        BlockPos posEast = pos.east();
+        BlockPos posGrass = (state.renderMaxX >= 1) ? posEast : pos;
 
-        boolean blocksGrassXYNP = !blockAccess.getBlock(xGrass, y + 1, z).getCanBlockGrass();
-        boolean blocksGrassXYNN = !blockAccess.getBlock(xGrass, y - 1, z).getCanBlockGrass();
-        boolean blocksGrassXZNN = !blockAccess.getBlock(xGrass, y, z - 1).getCanBlockGrass();
-        boolean blocksGrassXZNP = !blockAccess.getBlock(xGrass, y, z + 1).getCanBlockGrass();
+        boolean blocksGrassXYNP = !blockAccess.getBlockState(posGrass.up()).getBlock().isTranslucent();
+        boolean blocksGrassXYNN = !blockAccess.getBlockState(posGrass.down()).getBlock().isTranslucent();
+        boolean blocksGrassXZNN = !blockAccess.getBlockState(posGrass.north()).getBlock().isTranslucent();
+        boolean blocksGrassXZNP = !blockAccess.getBlockState(posGrass.south()).getBlock().isTranslucent();
 
         if (state.renderMaxX < 1)
-            setupAOBrightnessXPos(blockAccess, block, x, y, z, blocksGrassXYNP, blocksGrassXYNN, blocksGrassXZNN, blocksGrassXZNP);
+            setupAOBrightnessXPos(blockAccess, block, pos, blocksGrassXYNP, blocksGrassXYNN, blocksGrassXZNN, blocksGrassXZNP);
 
-        setupAOBrightnessXNeg(blockAccess, block, x + 1, y, z, blocksGrassXYNP, blocksGrassXYNN, blocksGrassXZNN, blocksGrassXZNP);
+        setupAOBrightnessXNeg(blockAccess, block, posEast, blocksGrassXYNP, blocksGrassXYNN, blocksGrassXZNN, blocksGrassXZNP);
 
         float xClamp = MathHelper.clamp_float((float) state.renderMaxX, 0, 1);
         mixAOBrightnessLightValueX(xClamp, 1 - xClamp);
 
-        int blockBrightness = block.getMixedBrightnessForBlock(blockAccess, x, y, z);
-        if (state.renderMaxX >= 1.0D || !blockAccess.getBlock(x + 1, y, z).isOpaqueCube())
-            blockBrightness = block.getMixedBrightnessForBlock(blockAccess, x + 1, y, z);
+        int blockBrightness = block.getMixedBrightnessForBlock(blockAccess, pos);
+        if (state.renderMaxX >= 1.0D || !blockAccess.getBlockState(posEast).getBlock().isOpaqueCube())
+            blockBrightness = block.getMixedBrightnessForBlock(blockAccess, posEast);
 
-        float aoOpposingBlock = blockAccess.getBlock(x + 1, y, z).getAmbientOcclusionLightValue();
+        float aoOpposingBlock = blockAccess.getBlockState(posEast).getBlock().getAmbientOcclusionLightValue();
         float aoXYZPNP = (aoLightValueScratchXYIN + aoLightValueScratchXYZINP + aoOpposingBlock + aoLightValueScratchXZIP) / 4.0F;
         float aoXYZPNN = (aoLightValueScratchXYZINN + aoLightValueScratchXYIN + aoLightValueScratchXZIN + aoOpposingBlock) / 4.0F;
         float aoXYZPPN = (aoLightValueScratchXZIN + aoOpposingBlock + aoLightValueScratchXYZIPN + aoLightValueScratchXYIP) / 4.0F;
@@ -504,203 +473,248 @@ public class ChamRenderAO
         }
     }
 
-    private void setupAOBrightnessYPos (IBlockAccess blockAccess, Block block, int x, int y, int z, boolean bgXP, boolean bgXN, boolean bgZP, boolean bgZN) {
-        aoLightValueScratchXYNP = blockAccess.getBlock(x - 1, y, z).getAmbientOcclusionLightValue();
-        aoLightValueScratchYZPN = blockAccess.getBlock(x, y, z - 1).getAmbientOcclusionLightValue();
-        aoLightValueScratchYZPP = blockAccess.getBlock(x, y, z + 1).getAmbientOcclusionLightValue();
-        aoLightValueScratchXYPP = blockAccess.getBlock(x + 1, y, z).getAmbientOcclusionLightValue();
+    private void setupAOBrightnessYPos (IBlockAccess blockAccess, Block block, BlockPos pos, boolean bgXP, boolean bgXN, boolean bgZP, boolean bgZN) {
+        BlockPos posWest = pos.west();
+        BlockPos posNorth = pos.north();
+        BlockPos posSouth = pos.south();
+        BlockPos posEast = pos.east();
+
+        aoLightValueScratchXYNP = blockAccess.getBlockState(posWest).getBlock().getAmbientOcclusionLightValue();
+        aoLightValueScratchYZPN = blockAccess.getBlockState(posNorth).getBlock().getAmbientOcclusionLightValue();
+        aoLightValueScratchYZPP = blockAccess.getBlockState(posSouth).getBlock().getAmbientOcclusionLightValue();
+        aoLightValueScratchXYPP = blockAccess.getBlockState(posEast).getBlock().getAmbientOcclusionLightValue();
         aoLightValueScratchXYZNPN = aoLightValueScratchXYNP;
         aoLightValueScratchXYZNPP = aoLightValueScratchXYNP;
         aoLightValueScratchXYZPPN = aoLightValueScratchXYPP;
         aoLightValueScratchXYZPPP = aoLightValueScratchXYPP;
 
-        aoBrightnessXYNP = block.getMixedBrightnessForBlock(blockAccess, x - 1, y, z);
-        aoBrightnessYZPN = block.getMixedBrightnessForBlock(blockAccess, x, y, z - 1);
-        aoBrightnessYZPP = block.getMixedBrightnessForBlock(blockAccess, x, y, z + 1);
-        aoBrightnessXYPP = block.getMixedBrightnessForBlock(blockAccess, x + 1, y, z);
+        aoBrightnessXYNP = block.getMixedBrightnessForBlock(blockAccess, posWest);
+        aoBrightnessYZPN = block.getMixedBrightnessForBlock(blockAccess, posNorth);
+        aoBrightnessYZPP = block.getMixedBrightnessForBlock(blockAccess, posSouth);
+        aoBrightnessXYPP = block.getMixedBrightnessForBlock(blockAccess, posEast);
         aoBrightnessXYZNPN = aoBrightnessXYNP;
         aoBrightnessXYZNPP = aoBrightnessXYNP;
         aoBrightnessXYZPPN = aoBrightnessXYPP;
         aoBrightnessXYZPPP = aoBrightnessXYPP;
 
         if (bgXN || bgZN) {
-            aoLightValueScratchXYZNPN = blockAccess.getBlock(x - 1, y, z - 1).getAmbientOcclusionLightValue();
-            aoBrightnessXYZNPN = block.getMixedBrightnessForBlock(blockAccess, x - 1, y, z - 1);
+            BlockPos posCorner = pos.add(-1, 0, -1);
+            aoLightValueScratchXYZNPN = blockAccess.getBlockState(posCorner).getBlock().getAmbientOcclusionLightValue();
+            aoBrightnessXYZNPN = block.getMixedBrightnessForBlock(blockAccess, posCorner);
         }
 
         if (bgXN || bgZP) {
-            aoLightValueScratchXYZNPP = blockAccess.getBlock(x - 1, y, z + 1).getAmbientOcclusionLightValue();
-            aoBrightnessXYZNPP = block.getMixedBrightnessForBlock(blockAccess, x - 1, y, z + 1);
+            BlockPos posCorner = pos.add(-1, 0, 1);
+            aoLightValueScratchXYZNPP = blockAccess.getBlockState(posCorner).getBlock().getAmbientOcclusionLightValue();
+            aoBrightnessXYZNPP = block.getMixedBrightnessForBlock(blockAccess, posCorner);
         }
 
         if (bgXP || bgZN) {
-            aoLightValueScratchXYZPPN = blockAccess.getBlock(x + 1, y, z - 1).getAmbientOcclusionLightValue();
-            aoBrightnessXYZPPN = block.getMixedBrightnessForBlock(blockAccess, x + 1, y, z - 1);
+            BlockPos posCorner = pos.add(1, 0, -1);
+            aoLightValueScratchXYZPPN = blockAccess.getBlockState(posCorner).getBlock().getAmbientOcclusionLightValue();
+            aoBrightnessXYZPPN = block.getMixedBrightnessForBlock(blockAccess, posCorner);
         }
 
         if (bgXP || bgZP) {
-            aoLightValueScratchXYZPPP = blockAccess.getBlock(x + 1, y, z + 1).getAmbientOcclusionLightValue();
-            aoBrightnessXYZPPP = block.getMixedBrightnessForBlock(blockAccess, x + 1, y, z + 1);
+            BlockPos posCorner = pos.add(1, 0, 1);
+            aoLightValueScratchXYZPPP = blockAccess.getBlockState(posCorner).getBlock().getAmbientOcclusionLightValue();
+            aoBrightnessXYZPPP = block.getMixedBrightnessForBlock(blockAccess, posCorner);
         }
     }
 
-    private void setupAOBrightnessZNeg (IBlockAccess blockAccess, Block block, int x, int y, int z, boolean bgXP, boolean bgXN, boolean bgYP, boolean bgYN) {
-        aoLightValueScratchXZNN = blockAccess.getBlock(x - 1, y, z).getAmbientOcclusionLightValue();
-        aoLightValueScratchYZNN = blockAccess.getBlock(x, y - 1, z).getAmbientOcclusionLightValue();
-        aoLightValueScratchYZPN = blockAccess.getBlock(x, y + 1, z).getAmbientOcclusionLightValue();
-        aoLightValueScratchXZPN = blockAccess.getBlock(x + 1, y, z).getAmbientOcclusionLightValue();
+    private void setupAOBrightnessZNeg (IBlockAccess blockAccess, Block block, BlockPos pos, boolean bgXP, boolean bgXN, boolean bgYP, boolean bgYN) {
+        BlockPos posWest = pos.west();
+        BlockPos posDown = pos.down();
+        BlockPos posUp = pos.up();
+        BlockPos posEast = pos.east();
+
+        aoLightValueScratchXZNN = blockAccess.getBlockState(posWest).getBlock().getAmbientOcclusionLightValue();
+        aoLightValueScratchYZNN = blockAccess.getBlockState(posDown).getBlock().getAmbientOcclusionLightValue();
+        aoLightValueScratchYZPN = blockAccess.getBlockState(posUp).getBlock().getAmbientOcclusionLightValue();
+        aoLightValueScratchXZPN = blockAccess.getBlockState(posEast).getBlock().getAmbientOcclusionLightValue();
         aoLightValueScratchXYZNNN = aoLightValueScratchXZNN;
         aoLightValueScratchXYZNPN = aoLightValueScratchXZNN;
         aoLightValueScratchXYZPNN = aoLightValueScratchXZPN;
         aoLightValueScratchXYZPPN = aoLightValueScratchXZPN;
 
-        aoBrightnessXZNN = block.getMixedBrightnessForBlock(blockAccess, x - 1, y, z);
-        aoBrightnessYZNN = block.getMixedBrightnessForBlock(blockAccess, x, y - 1, z);
-        aoBrightnessYZPN = block.getMixedBrightnessForBlock(blockAccess, x, y + 1, z);
-        aoBrightnessXZPN = block.getMixedBrightnessForBlock(blockAccess, x + 1, y, z);
+        aoBrightnessXZNN = block.getMixedBrightnessForBlock(blockAccess, posWest);
+        aoBrightnessYZNN = block.getMixedBrightnessForBlock(blockAccess, posDown);
+        aoBrightnessYZPN = block.getMixedBrightnessForBlock(blockAccess, posUp);
+        aoBrightnessXZPN = block.getMixedBrightnessForBlock(blockAccess, posEast);
         aoBrightnessXYZNNN = aoBrightnessXZNN;
         aoBrightnessXYZNPN = aoBrightnessXZNN;
         aoBrightnessXYZPNN = aoBrightnessXZPN;
         aoBrightnessXYZPPN = aoBrightnessXZPN;
 
         if (bgXN || bgYN) {
-            aoLightValueScratchXYZNNN = blockAccess.getBlock(x - 1, y - 1, z).getAmbientOcclusionLightValue();
-            aoBrightnessXYZNNN = block.getMixedBrightnessForBlock(blockAccess, x - 1, y - 1, z);
+            BlockPos posCorner = pos.add(-1, -1, 0);
+            aoLightValueScratchXYZNNN = blockAccess.getBlockState(posCorner).getBlock().getAmbientOcclusionLightValue();
+            aoBrightnessXYZNNN = block.getMixedBrightnessForBlock(blockAccess, posCorner);
         }
 
         if (bgXN || bgYP) {
-            aoLightValueScratchXYZNPN = blockAccess.getBlock(x - 1, y + 1, z).getAmbientOcclusionLightValue();
-            aoBrightnessXYZNPN = block.getMixedBrightnessForBlock(blockAccess, x - 1, y + 1, z);
+            BlockPos posCorner = pos.add(-1, 1, 0);
+            aoLightValueScratchXYZNPN = blockAccess.getBlockState(posCorner).getBlock().getAmbientOcclusionLightValue();
+            aoBrightnessXYZNPN = block.getMixedBrightnessForBlock(blockAccess, posCorner);
         }
 
         if (bgXP || bgYN) {
-            aoLightValueScratchXYZPNN = blockAccess.getBlock(x + 1, y - 1, z).getAmbientOcclusionLightValue();
-            aoBrightnessXYZPNN = block.getMixedBrightnessForBlock(blockAccess, x + 1, y - 1, z);
+            BlockPos posCorner = pos.add(1, -1, 0);
+            aoLightValueScratchXYZPNN = blockAccess.getBlockState(posCorner).getBlock().getAmbientOcclusionLightValue();
+            aoBrightnessXYZPNN = block.getMixedBrightnessForBlock(blockAccess, posCorner);
         }
 
         if (bgXP || bgYP) {
-            aoLightValueScratchXYZPPN = blockAccess.getBlock(x + 1, y + 1, z).getAmbientOcclusionLightValue();
-            aoBrightnessXYZPPN = block.getMixedBrightnessForBlock(blockAccess, x + 1, y + 1, z);
+            BlockPos posCorner = pos.add(1, 1, 0);
+            aoLightValueScratchXYZPPN = blockAccess.getBlockState(posCorner).getBlock().getAmbientOcclusionLightValue();
+            aoBrightnessXYZPPN = block.getMixedBrightnessForBlock(blockAccess, posCorner);
         }
     }
 
-    private void setupAOBrightnessZPos (IBlockAccess blockAccess, Block block, int x, int y, int z, boolean bgXP, boolean bgXN, boolean bgYP, boolean bgYN) {
-        aoLightValueScratchXZNP = blockAccess.getBlock(x - 1, y, z).getAmbientOcclusionLightValue();
-        aoLightValueScratchXZPP = blockAccess.getBlock(x + 1, y, z).getAmbientOcclusionLightValue();
-        aoLightValueScratchYZNP = blockAccess.getBlock(x, y - 1, z).getAmbientOcclusionLightValue();
-        aoLightValueScratchYZPP = blockAccess.getBlock(x, y + 1, z).getAmbientOcclusionLightValue();
+    private void setupAOBrightnessZPos (IBlockAccess blockAccess, Block block, BlockPos pos, boolean bgXP, boolean bgXN, boolean bgYP, boolean bgYN) {
+        BlockPos posWest = pos.west();
+        BlockPos posDown = pos.down();
+        BlockPos posUp = pos.up();
+        BlockPos posEast = pos.east();
+
+        aoLightValueScratchXZNP = blockAccess.getBlockState(posWest).getBlock().getAmbientOcclusionLightValue();
+        aoLightValueScratchXZPP = blockAccess.getBlockState(posEast).getBlock().getAmbientOcclusionLightValue();
+        aoLightValueScratchYZNP = blockAccess.getBlockState(posDown).getBlock().getAmbientOcclusionLightValue();
+        aoLightValueScratchYZPP = blockAccess.getBlockState(posUp).getBlock().getAmbientOcclusionLightValue();
         aoLightValueScratchXYZNNP = aoLightValueScratchXZNP;
         aoLightValueScratchXYZNPP = aoLightValueScratchXZNP;
         aoLightValueScratchXYZPNP = aoLightValueScratchXZPP;
         aoLightValueScratchXYZPPP = aoLightValueScratchXZPP;
 
-        aoBrightnessXZNP = block.getMixedBrightnessForBlock(blockAccess, x - 1, y, z);
-        aoBrightnessXZPP = block.getMixedBrightnessForBlock(blockAccess, x + 1, y, z);
-        aoBrightnessYZNP = block.getMixedBrightnessForBlock(blockAccess, x, y - 1, z);
-        aoBrightnessYZPP = block.getMixedBrightnessForBlock(blockAccess, x, y + 1, z);
+        aoBrightnessXZNP = block.getMixedBrightnessForBlock(blockAccess, posWest);
+        aoBrightnessXZPP = block.getMixedBrightnessForBlock(blockAccess, posEast);
+        aoBrightnessYZNP = block.getMixedBrightnessForBlock(blockAccess, posDown);
+        aoBrightnessYZPP = block.getMixedBrightnessForBlock(blockAccess, posUp);
         aoBrightnessXYZNNP = aoBrightnessXZNP;
         aoBrightnessXYZNPP = aoBrightnessXZNP;
         aoBrightnessXYZPNP = aoBrightnessXZPP;
         aoBrightnessXYZPPP = aoBrightnessXZPP;
 
         if (bgXN || bgYN) {
-            aoLightValueScratchXYZNNP = blockAccess.getBlock(x - 1, y - 1, z).getAmbientOcclusionLightValue();
-            aoBrightnessXYZNNP = block.getMixedBrightnessForBlock(blockAccess, x - 1, y - 1, z);
+            BlockPos posCorner = pos.add(-1, -1, 0);
+            aoLightValueScratchXYZNNP = blockAccess.getBlockState(posCorner).getBlock().getAmbientOcclusionLightValue();
+            aoBrightnessXYZNNP = block.getMixedBrightnessForBlock(blockAccess, posCorner);
         }
 
         if (bgXN || bgYP) {
-            aoLightValueScratchXYZNPP = blockAccess.getBlock(x - 1, y + 1, z).getAmbientOcclusionLightValue();
-            aoBrightnessXYZNPP = block.getMixedBrightnessForBlock(blockAccess, x - 1, y + 1, z);
+            BlockPos posCorner = pos.add(-1, 1, 0);
+            aoLightValueScratchXYZNPP = blockAccess.getBlockState(posCorner).getBlock().getAmbientOcclusionLightValue();
+            aoBrightnessXYZNPP = block.getMixedBrightnessForBlock(blockAccess, posCorner);
         }
 
         if (bgXP || bgYN) {
-            aoLightValueScratchXYZPNP = blockAccess.getBlock(x + 1, y - 1, z).getAmbientOcclusionLightValue();
-            aoBrightnessXYZPNP = block.getMixedBrightnessForBlock(blockAccess, x + 1, y - 1, z);
+            BlockPos posCorner = pos.add(1, -1, 0);
+            aoLightValueScratchXYZPNP = blockAccess.getBlockState(posCorner).getBlock().getAmbientOcclusionLightValue();
+            aoBrightnessXYZPNP = block.getMixedBrightnessForBlock(blockAccess, posCorner);
         }
 
         if (bgXP || bgYP) {
-            aoLightValueScratchXYZPPP = blockAccess.getBlock(x + 1, y + 1, z).getAmbientOcclusionLightValue();
-            aoBrightnessXYZPPP = block.getMixedBrightnessForBlock(blockAccess, x + 1, y + 1, z);
+            BlockPos posCorner = pos.add(1, 1, 0);
+            aoLightValueScratchXYZPPP = blockAccess.getBlockState(posCorner).getBlock().getAmbientOcclusionLightValue();
+            aoBrightnessXYZPPP = block.getMixedBrightnessForBlock(blockAccess, posCorner);
         }
     }
 
-    private void setupAOBrightnessXNeg (IBlockAccess blockAccess, Block block, int x, int y, int z, boolean bgYP, boolean bgYN, boolean bgZN, boolean bgZP) {
-        aoLightValueScratchXYNN = blockAccess.getBlock(x, y - 1, z).getAmbientOcclusionLightValue();
-        aoLightValueScratchXZNN = blockAccess.getBlock(x, y, z - 1).getAmbientOcclusionLightValue();
-        aoLightValueScratchXZNP = blockAccess.getBlock(x, y, z + 1).getAmbientOcclusionLightValue();
-        aoLightValueScratchXYNP = blockAccess.getBlock(x, y + 1, z).getAmbientOcclusionLightValue();
+    private void setupAOBrightnessXNeg (IBlockAccess blockAccess, Block block, BlockPos pos, boolean bgYP, boolean bgYN, boolean bgZN, boolean bgZP) {
+        BlockPos posDown = pos.down();
+        BlockPos posNorth = pos.north();
+        BlockPos posSouth = pos.south();
+        BlockPos posUp = pos.up();
+
+        aoLightValueScratchXYNN = blockAccess.getBlockState(posDown).getBlock().getAmbientOcclusionLightValue();
+        aoLightValueScratchXZNN = blockAccess.getBlockState(posNorth).getBlock().getAmbientOcclusionLightValue();
+        aoLightValueScratchXZNP = blockAccess.getBlockState(posSouth).getBlock().getAmbientOcclusionLightValue();
+        aoLightValueScratchXYNP = blockAccess.getBlockState(posUp).getBlock().getAmbientOcclusionLightValue();
         aoLightValueScratchXYZNNN = aoLightValueScratchXZNN;
         aoLightValueScratchXYZNNP = aoLightValueScratchXZNP;
         aoLightValueScratchXYZNPN = aoLightValueScratchXZNN;
         aoLightValueScratchXYZNPP = aoLightValueScratchXZNP;
 
-        aoBrightnessXYNN = block.getMixedBrightnessForBlock(blockAccess, x, y - 1, z);
-        aoBrightnessXZNN = block.getMixedBrightnessForBlock(blockAccess, x, y, z - 1);
-        aoBrightnessXZNP = block.getMixedBrightnessForBlock(blockAccess, x, y, z + 1);
-        aoBrightnessXYNP = block.getMixedBrightnessForBlock(blockAccess, x, y + 1, z);
+        aoBrightnessXYNN = block.getMixedBrightnessForBlock(blockAccess, posDown);
+        aoBrightnessXZNN = block.getMixedBrightnessForBlock(blockAccess, posNorth);
+        aoBrightnessXZNP = block.getMixedBrightnessForBlock(blockAccess, posSouth);
+        aoBrightnessXYNP = block.getMixedBrightnessForBlock(blockAccess, posUp);
         aoBrightnessXYZNNN = aoBrightnessXZNN;
         aoBrightnessXYZNNP = aoBrightnessXZNP;
         aoBrightnessXYZNPN = aoBrightnessXZNN;
         aoBrightnessXYZNPP = aoBrightnessXZNP;
 
         if (bgZN || bgYN) {
-            aoLightValueScratchXYZNNN = blockAccess.getBlock(x, y - 1, z - 1).getAmbientOcclusionLightValue();
-            aoBrightnessXYZNNN = block.getMixedBrightnessForBlock(blockAccess, x, y - 1, z - 1);
+            BlockPos posCorner = pos.add(0, -1, -1);
+            aoLightValueScratchXYZNNN = blockAccess.getBlockState(posCorner).getBlock().getAmbientOcclusionLightValue();
+            aoBrightnessXYZNNN = block.getMixedBrightnessForBlock(blockAccess, posCorner);
         }
 
         if (bgZP || bgYN) {
-            aoLightValueScratchXYZNNP = blockAccess.getBlock(x, y - 1, z + 1).getAmbientOcclusionLightValue();
-            aoBrightnessXYZNNP = block.getMixedBrightnessForBlock(blockAccess, x, y - 1, z + 1);
+            BlockPos posCorner = pos.add(0, -1, 1);
+            aoLightValueScratchXYZNNP = blockAccess.getBlockState(posCorner).getBlock().getAmbientOcclusionLightValue();
+            aoBrightnessXYZNNP = block.getMixedBrightnessForBlock(blockAccess, posCorner);
         }
 
         if (bgZN || bgYP) {
-            aoLightValueScratchXYZNPN = blockAccess.getBlock(x, y + 1, z - 1).getAmbientOcclusionLightValue();
-            aoBrightnessXYZNPN = block.getMixedBrightnessForBlock(blockAccess, x, y + 1, z - 1);
+            BlockPos posCorner = pos.add(0, 1, -1);
+            aoLightValueScratchXYZNPN = blockAccess.getBlockState(posCorner).getBlock().getAmbientOcclusionLightValue();
+            aoBrightnessXYZNPN = block.getMixedBrightnessForBlock(blockAccess, posCorner);
         }
 
         if (bgZP || bgYP) {
-            aoLightValueScratchXYZNPP = blockAccess.getBlock(x, y + 1, z + 1).getAmbientOcclusionLightValue();
-            aoBrightnessXYZNPP = block.getMixedBrightnessForBlock(blockAccess, x, y + 1, z + 1);
+            BlockPos posCorner = pos.add(0, 1, 1);
+            aoLightValueScratchXYZNPP = blockAccess.getBlockState(posCorner).getBlock().getAmbientOcclusionLightValue();
+            aoBrightnessXYZNPP = block.getMixedBrightnessForBlock(blockAccess, posCorner);
         }
     }
 
-    private void setupAOBrightnessXPos (IBlockAccess blockAccess, Block block, int x, int y, int z, boolean bgYP, boolean bgYN, boolean bgZN, boolean bgZP) {
-        aoLightValueScratchXYPN = blockAccess.getBlock(x, y - 1, z).getAmbientOcclusionLightValue();
-        aoLightValueScratchXZPN = blockAccess.getBlock(x, y, z - 1).getAmbientOcclusionLightValue();
-        aoLightValueScratchXZPP = blockAccess.getBlock(x, y, z + 1).getAmbientOcclusionLightValue();
-        aoLightValueScratchXYPP = blockAccess.getBlock(x, y + 1, z).getAmbientOcclusionLightValue();
+    private void setupAOBrightnessXPos (IBlockAccess blockAccess, Block block, BlockPos pos, boolean bgYP, boolean bgYN, boolean bgZN, boolean bgZP) {
+        BlockPos posDown = pos.down();
+        BlockPos posNorth = pos.north();
+        BlockPos posSouth = pos.south();
+        BlockPos posUp = pos.up();
+
+        aoLightValueScratchXYPN = blockAccess.getBlockState(posDown).getBlock().getAmbientOcclusionLightValue();
+        aoLightValueScratchXZPN = blockAccess.getBlockState(posNorth).getBlock().getAmbientOcclusionLightValue();
+        aoLightValueScratchXZPP = blockAccess.getBlockState(posSouth).getBlock().getAmbientOcclusionLightValue();
+        aoLightValueScratchXYPP = blockAccess.getBlockState(posUp).getBlock().getAmbientOcclusionLightValue();
         aoLightValueScratchXYZPNN = aoLightValueScratchXZPN;
         aoLightValueScratchXYZPNP = aoLightValueScratchXZPP;
         aoLightValueScratchXYZPPN = aoLightValueScratchXZPN;
         aoLightValueScratchXYZPPP = aoLightValueScratchXZPP;
 
-        aoBrightnessXYPN = block.getMixedBrightnessForBlock(blockAccess, x, y - 1, z);
-        aoBrightnessXZPN = block.getMixedBrightnessForBlock(blockAccess, x, y, z - 1);
-        aoBrightnessXZPP = block.getMixedBrightnessForBlock(blockAccess, x, y, z + 1);
-        aoBrightnessXYPP = block.getMixedBrightnessForBlock(blockAccess, x, y + 1, z);
+        aoBrightnessXYPN = block.getMixedBrightnessForBlock(blockAccess, posDown);
+        aoBrightnessXZPN = block.getMixedBrightnessForBlock(blockAccess, posNorth);
+        aoBrightnessXZPP = block.getMixedBrightnessForBlock(blockAccess, posSouth);
+        aoBrightnessXYPP = block.getMixedBrightnessForBlock(blockAccess, posUp);
         aoBrightnessXYZPNN = aoBrightnessXZPN;
         aoBrightnessXYZPNP = aoBrightnessXZPP;
         aoBrightnessXYZPPN = aoBrightnessXZPN;
         aoBrightnessXYZPPP = aoBrightnessXZPP;
 
         if (bgYN || bgZN) {
-            aoLightValueScratchXYZPNN = blockAccess.getBlock(x, y - 1, z - 1).getAmbientOcclusionLightValue();
-            aoBrightnessXYZPNN = block.getMixedBrightnessForBlock(blockAccess, x, y - 1, z - 1);
+            BlockPos posCorner = pos.add(0, -1, -1);
+            aoLightValueScratchXYZPNN = blockAccess.getBlockState(posCorner).getBlock().getAmbientOcclusionLightValue();
+            aoBrightnessXYZPNN = block.getMixedBrightnessForBlock(blockAccess, posCorner);
         }
 
         if (bgYN || bgZP) {
-            aoLightValueScratchXYZPNP = blockAccess.getBlock(x, y - 1, z + 1).getAmbientOcclusionLightValue();
-            aoBrightnessXYZPNP = block.getMixedBrightnessForBlock(blockAccess, x, y - 1, z + 1);
+            BlockPos posCorner = pos.add(0, -1, 1);
+            aoLightValueScratchXYZPNP = blockAccess.getBlockState(posCorner).getBlock().getAmbientOcclusionLightValue();
+            aoBrightnessXYZPNP = block.getMixedBrightnessForBlock(blockAccess, posCorner);
         }
 
         if (bgYP || bgZN) {
-            aoLightValueScratchXYZPPN = blockAccess.getBlock(x, y + 1, z - 1).getAmbientOcclusionLightValue();
-            aoBrightnessXYZPPN = block.getMixedBrightnessForBlock(blockAccess, x, y + 1, z - 1);
+            BlockPos posCorner = pos.add(0, 1, -1);
+            aoLightValueScratchXYZPPN = blockAccess.getBlockState(posCorner).getBlock().getAmbientOcclusionLightValue();
+            aoBrightnessXYZPPN = block.getMixedBrightnessForBlock(blockAccess, posCorner);
         }
 
         if (bgYP || bgZP) {
-            aoLightValueScratchXYZPPP = blockAccess.getBlock(x, y + 1, z + 1).getAmbientOcclusionLightValue();
-            aoBrightnessXYZPPP = block.getMixedBrightnessForBlock(blockAccess, x, y + 1, z + 1);
+            BlockPos posCorner = pos.add(0, 1, 1);
+            aoLightValueScratchXYZPPP = blockAccess.getBlockState(posCorner).getBlock().getAmbientOcclusionLightValue();
+            aoBrightnessXYZPPP = block.getMixedBrightnessForBlock(blockAccess, posCorner);
         }
     }
 
@@ -883,7 +897,7 @@ public class ChamRenderAO
             aoBrightnessXYZIPP = mixAOBrightness(aoBrightnessXYZNPP, aoBrightnessXYZPPP, fMin, fMax);
         }
     }
-    */
+
 
     public static int getAOBrightness (int com1, int com2, int com3, int base) {
         if (com1 == 0)

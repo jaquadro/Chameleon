@@ -43,7 +43,7 @@ public class ChamRender
 
     public ChamRenderState state = new ChamRenderState();
 
-    //private RenderHelperAO aoHelper = new RenderHelperAO(state);
+    private ChamRenderAO aoHelper = new ChamRenderAO(state);
     private ChamRenderLL llHelper = new ChamRenderLL(state);
 
     private float[] colorScratch = new float[3];
@@ -136,9 +136,9 @@ public class ChamRender
     }
 
     public void renderFace (int face, IBlockAccess blockAccess, IBlockState blockState, BlockPos pos, TextureAtlasSprite icon, float r, float g, float b) {
-        //if (Minecraft.isAmbientOcclusionEnabled() && blockAccess != null && block.getLightValue(blockAccess, x, y, z) == 0)
-        //    renderFaceAOPartial(face, blockAccess, block, x, y, z, icon, r, g, b);
-        //else
+        if (Minecraft.isAmbientOcclusionEnabled() && blockAccess != null && blockState.getBlock().getLightValue(blockAccess, pos) == 0)
+            renderFaceAOPartial(face, blockAccess, blockState, pos, icon, r, g, b);
+        else
             renderFaceColorMult(face, blockAccess, blockState, pos, icon, r, g, b);
     }
 
@@ -152,36 +152,36 @@ public class ChamRender
             Tessellator.getInstance().draw();
     }
     
-    /*public void renderFaceAOPartial (int face, IBlockAccess blockAccess, Block block, int x, int y, int z, TextureAtlasSprite icon, float r, float g, float b) {
+    public void renderFaceAOPartial (int face, IBlockAccess blockAccess, IBlockState blockState, BlockPos pos, TextureAtlasSprite icon, float r, float g, float b) {
         state.enableAO = true;
 
-        face = RenderHelperState.FACE_BY_FACE_ROTATION[face][state.rotateTransform];
+        face = ChamRenderState.FACE_BY_FACE_ROTATION[face][state.rotateTransform];
 
         switch (face) {
             case YNEG:
-                aoHelper.setupYNegAOPartial(blockAccess, block, x, y, z, r, g, b);
+                aoHelper.setupYNegAOPartial(blockAccess, blockState.getBlock(), pos, r, g, b);
                 break;
             case YPOS:
-                aoHelper.setupYPosAOPartial(blockAccess, block, x, y, z, r, g, b);
+                aoHelper.setupYPosAOPartial(blockAccess, blockState.getBlock(), pos, r, g, b);
                 break;
             case ZNEG:
-                aoHelper.setupZNegAOPartial(blockAccess, block, x, y, z, r, g, b);
+                aoHelper.setupZNegAOPartial(blockAccess, blockState.getBlock(), pos, r, g, b);
                 break;
             case ZPOS:
-                aoHelper.setupZPosAOPartial(blockAccess, block, x, y, z, r, g, b);
+                aoHelper.setupZPosAOPartial(blockAccess, blockState.getBlock(), pos, r, g, b);
                 break;
             case XNEG:
-                aoHelper.setupXNegAOPartial(blockAccess, block, x, y, z, r, g, b);
+                aoHelper.setupXNegAOPartial(blockAccess, blockState.getBlock(), pos, r, g, b);
                 break;
             case XPOS:
-                aoHelper.setupXPosAOPartial(blockAccess, block, x, y, z, r, g, b);
+                aoHelper.setupXPosAOPartial(blockAccess, blockState.getBlock(), pos, r, g, b);
                 break;
         }
 
-        llHelper.drawFace(face, x, y, z, icon);
+        llHelper.drawFace(face, pos.getX(), pos.getY(), pos.getZ(), icon);
 
         state.enableAO = false;
-    }*/
+    }
 
     public void renderPartialFace (int face, IBlockAccess blockAccess, IBlockState blockState, BlockPos pos, TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax) {
         calculateBaseColor(colorScratch, blockState.getBlock().colorMultiplier(blockAccess, pos));
@@ -189,9 +189,9 @@ public class ChamRender
     }
 
     public void renderPartialFace (int face, IBlockAccess blockAccess, IBlockState blockState, BlockPos pos, TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax, float r, float g, float b) {
-        //if (Minecraft.isAmbientOcclusionEnabled() && blockAccess != null && block.getLightValue(blockAccess, x, y, z) == 0)
-        //    renderPartialFaceAOPartial(face, blockAccess, block, x, y, z, icon, uMin, vMin, uMax, vMax, r, g, b);
-        //else
+        if (Minecraft.isAmbientOcclusionEnabled() && blockAccess != null && blockState.getBlock().getLightValue(blockAccess, pos) == 0)
+            renderPartialFaceAOPartial(face, blockAccess, blockState, pos, icon, uMin, vMin, uMax, vMax, r, g, b);
+        else
             renderPartialFaceColorMult(face, blockAccess, blockState, pos, icon, uMin, vMin, uMax, vMax, r, g, b);
     }
 
@@ -210,33 +210,33 @@ public class ChamRender
             Tessellator.getInstance().draw();
     }
 
-    /*public void renderPartialFaceAOPartial (int face, IBlockAccess blockAccess, Block block, int x, int y, int z, TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax, float r, float g, float b) {
+    public void renderPartialFaceAOPartial (int face, IBlockAccess blockAccess, IBlockState blockState, BlockPos pos, TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax, float r, float g, float b) {
         state.enableAO = true;
 
-        switch (RenderHelperState.FACE_BY_FACE_ROTATION[face][state.rotateTransform]) {
+        switch (ChamRenderState.FACE_BY_FACE_ROTATION[face][state.rotateTransform]) {
             case YNEG:
-                aoHelper.setupYNegAOPartial(blockAccess, block, x, y, z, r, g, b);
+                aoHelper.setupYNegAOPartial(blockAccess, blockState.getBlock(), pos, r, g, b);
                 break;
             case YPOS:
-                aoHelper.setupYPosAOPartial(blockAccess, block, x, y, z, r, g, b);
+                aoHelper.setupYPosAOPartial(blockAccess, blockState.getBlock(), pos, r, g, b);
                 break;
             case ZNEG:
-                aoHelper.setupZNegAOPartial(blockAccess, block, x, y, z, r, g, b);
+                aoHelper.setupZNegAOPartial(blockAccess, blockState.getBlock(), pos, r, g, b);
                 break;
             case ZPOS:
-                aoHelper.setupZPosAOPartial(blockAccess, block, x, y, z, r, g, b);
+                aoHelper.setupZPosAOPartial(blockAccess, blockState.getBlock(), pos, r, g, b);
                 break;
             case XNEG:
-                aoHelper.setupXNegAOPartial(blockAccess, block, x, y, z, r, g, b);
+                aoHelper.setupXNegAOPartial(blockAccess, blockState.getBlock(), pos, r, g, b);
                 break;
             case XPOS:
-                aoHelper.setupXPosAOPartial(blockAccess, block, x, y, z, r, g, b);
+                aoHelper.setupXPosAOPartial(blockAccess, blockState.getBlock(), pos, r, g, b);
                 break;
         }
 
-        renderPartialFace(face, x, y, z, icon, uMin, vMin, uMax, vMax);
+        renderPartialFace(face, pos.getX(), pos.getY(), pos.getZ(), icon, uMin, vMin, uMax, vMax);
         state.enableAO = false;
-    }*/
+    }
 
     public void renderPartialFace (int face, TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax) {
         state.enableAO = false;
