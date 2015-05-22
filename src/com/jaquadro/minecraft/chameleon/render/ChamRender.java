@@ -41,6 +41,8 @@ public class ChamRender
         { 1, 0, 0 },
     };
 
+    private WorldRenderer tessellator;
+
     public ChamRenderState state = new ChamRenderState();
 
     private ChamRenderAO aoHelper = new ChamRenderAO(state);
@@ -78,6 +80,14 @@ public class ChamRender
 
     public static void setTessellatorColor (WorldRenderer tessellator, float[] color) {
         tessellator.setColorOpaque_F(color[0], color[1], color[2]);
+    }
+
+    void setWorldRenderer (WorldRenderer worldRenderer) {
+        tessellator = worldRenderer;
+    }
+
+    WorldRenderer getWorldRenderer () {
+        return tessellator;
     }
 
     public void renderEmptyPlane (int x, int y, int z) {
@@ -254,7 +264,9 @@ public class ChamRender
     }*/
 
     public void renderCrossedSquares (IBlockState blockState, TextureAtlasSprite icon) {
-        WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
+        if (tessellator == null)
+            return;
+
         tessellator.setBrightness(FULL_BRIGHTNESS);
 
         calculateBaseColor(colorScratch, blockState.getBlock().getRenderColor(blockState));
@@ -263,11 +275,11 @@ public class ChamRender
         boolean lighting = GL11.glIsEnabled(GL11.GL_LIGHTING);
         GL11.glDisable(GL11.GL_LIGHTING);
 
-        tessellator.startDrawingQuads();
+        //tessellator.startDrawingQuads();
 
         drawCrossedSquares(icon, 0, 0, 0, 1.0F);
 
-        Tessellator.getInstance().draw();
+        //Tessellator.getInstance().draw();
 
         if (lighting)
             GL11.glEnable(GL11.GL_LIGHTING);
@@ -278,9 +290,12 @@ public class ChamRender
     }*/
 
     public void renderCrossedSquares (IBlockAccess blockAccess, IBlockState blockState, BlockPos pos, TextureAtlasSprite icon) {
+        if (tessellator == null)
+            return;
+
         Block block = blockState.getBlock();
 
-        WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
+        //WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
         tessellator.setBrightness(block.getMixedBrightnessForBlock(blockAccess, pos));
 
         calculateBaseColor(colorScratch, block.colorMultiplier(blockAccess, pos));
@@ -291,7 +306,9 @@ public class ChamRender
 
     public void drawCrossedSquares(TextureAtlasSprite icon, double x, double y, double z, float scale)
     {
-        WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
+        if (tessellator == null)
+            return;
+        //WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
 
         double uMin = icon.getInterpolatedU(state.renderMinX * 16.0D);
         double uMax = icon.getInterpolatedU(state.renderMaxX * 16.0D);
@@ -327,7 +344,9 @@ public class ChamRender
 
     public void drawCrossedSquaresBounded(TextureAtlasSprite icon, double x, double y, double z, float scale)
     {
-        WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
+        if (tessellator == null)
+            return;
+        //WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
 
         double vMin = icon.getInterpolatedV(16 - state.renderMaxY * 16.0D);
         double vMax = icon.getInterpolatedV(16 - state.renderMinY * 16.0D);
@@ -381,7 +400,9 @@ public class ChamRender
     }
 
     private void setupColorMult (int face, float r, float g, float b) {
-        WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
+        if (tessellator == null)
+            return;
+        //WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
         float[] rgb = rgbMap[face];
         float[] norm = normMap[face];
 
@@ -393,12 +414,15 @@ public class ChamRender
     }
 
     private void setupColorMult (int face, IBlockAccess blockAccess, IBlockState blockState, BlockPos pos, float r, float g, float b) {
-        WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
+        if (tessellator == null)
+            return;
+
+        //WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
         float[] rgb = rgbMap[face];
         float[] norm = normMap[face];
 
         if (blockAccess == null) {
-            tessellator.startDrawingQuads();
+            //tessellator.startDrawingQuads();
             tessellator.setColorOpaque_F(r, g, b);
             tessellator.setNormal(norm[0], norm[1], norm[2]);
         }
