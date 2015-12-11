@@ -49,11 +49,15 @@ public class ChamRenderState
     public float colorMultXNeg;
     public float colorMultXPos;
 
+    public int brightness;
     public int brightnessTopLeft;
     public int brightnessBottomLeft;
     public int brightnessBottomRight;
     public int brightnessTopRight;
 
+    public final float[] normal = new float[3];
+
+    public final float[] color = new float[3];
     public final float[] colorTopLeft = new float[3];
     public final float[] colorBottomLeft = new float[3];
     public final float[] colorBottomRight = new float[3];
@@ -103,6 +107,10 @@ public class ChamRenderState
     }
 
     public void setColor (float r, float g, float b) {
+        color[0] = r;
+        color[1] = r;
+        color[2] = r;
+
         colorTopLeft[0] = r;
         colorTopLeft[1] = g;
         colorTopLeft[2] = b;
@@ -120,9 +128,27 @@ public class ChamRenderState
         colorTopRight[2] = b;
     }
 
+    public void setColor (float[] color) {
+        setColor(color[0], color[1], color[2]);
+    }
+
     public void scaleColor (float[] color, float scale) {
         for (int i = 0; i < color.length; i++)
             color[i] *= scale;
+    }
+
+    public void setNormal (float nx, float ny, float nz) {
+        normal[0] = nx;
+        normal[1] = ny;
+        normal[2] = nz;
+    }
+
+    public void setNormal (float[] normal) {
+        setNormal(normal[0], normal[1], normal[2]);
+    }
+
+    public void setBrightness (int brightness) {
+        this.brightness = brightness;
     }
 
     public void setRotateTransform (int faceFrom, int faceTo) {

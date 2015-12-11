@@ -1,8 +1,6 @@
 package com.jaquadro.minecraft.chameleon.render;
 
 import net.minecraft.block.Block;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.IBlockAccess;
@@ -113,8 +111,7 @@ public class ChamRenderAO
     }
 
     public void setupYNegAOPartial (IBlockAccess blockAccess, Block block, BlockPos pos, float r, float g, float b) {
-        WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
-        tessellator.setBrightness(983055);
+        state.brightness = 983055;
 
         BlockPos posDown = pos.down();
         BlockPos posGrass = (state.renderMinY <= 0) ? posDown : pos;
@@ -165,8 +162,7 @@ public class ChamRenderAO
     }
 
     public void setupYPosAOPartial (IBlockAccess blockAccess, Block block, BlockPos pos, float r, float g, float b) {
-        WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
-        tessellator.setBrightness(983055);
+        state.brightness = 983055;
 
         BlockPos posUp = pos.up();
         BlockPos posGrass = (state.renderMaxY >= 1) ? posUp : pos;
@@ -217,8 +213,7 @@ public class ChamRenderAO
     }
 
     public void setupZNegAOPartial (IBlockAccess blockAccess, Block block, BlockPos pos, float r, float g, float b) {
-        WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
-        tessellator.setBrightness(983055);
+        state.brightness = 983055;
 
         BlockPos posNorth = pos.north();
         BlockPos posGrass = (state.renderMinZ <= 0) ? posNorth : pos;
@@ -269,8 +264,7 @@ public class ChamRenderAO
     }
 
     public void setupZPosAOPartial (IBlockAccess blockAccess, Block block, BlockPos pos, float r, float g, float b) {
-        WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
-        tessellator.setBrightness(983055);
+        state.brightness = 983055;
 
         BlockPos posSouth = pos.south();
         BlockPos posGrass = (state.renderMaxZ >= 1) ? posSouth : pos;
@@ -321,8 +315,7 @@ public class ChamRenderAO
     }
 
     public void setupXNegAOPartial (IBlockAccess blockAccess, Block block, BlockPos pos, float r, float g, float b) {
-        WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
-        tessellator.setBrightness(983055);
+        state.brightness = 983055;
 
         BlockPos posWest = pos.west();
         BlockPos posGrass = (state.renderMinX <= 0) ? posWest : pos;
@@ -373,8 +366,7 @@ public class ChamRenderAO
     }
 
     public void setupXPosAOPartial (IBlockAccess blockAccess, Block block, BlockPos pos, float r, float g, float b) {
-        WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
-        tessellator.setBrightness(983055);
+        state.brightness = 983055;
 
         BlockPos posEast = pos.east();
         BlockPos posGrass = (state.renderMaxX >= 1) ? posEast : pos;

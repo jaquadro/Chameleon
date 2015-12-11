@@ -2,6 +2,8 @@ package com.jaquadro.minecraft.chameleon.render;
 
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.WorldVertexBufferUploader;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import org.lwjgl.opengl.GL11;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,7 +47,7 @@ public class ChamRenderManager
     public ChamRender startDrawing (WorldRenderer worldRenderer) {
         ChamRender renderer = getRenderer(worldRenderer);
         try {
-            worldRenderer.startDrawingQuads();
+            worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK);
         }
         catch (IllegalStateException e) { }
 
@@ -61,8 +63,8 @@ public class ChamRenderManager
                 return;
 
             try {
-                int byteIndex = worldRenderer.finishDrawing();
-                vboUploader.draw(worldRenderer, byteIndex);
+                worldRenderer.finishDrawing();
+                this.vboUploader.func_181679_a(worldRenderer);
             } catch (IllegalStateException e) {
             }
 

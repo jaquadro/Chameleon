@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import org.lwjgl.opengl.GL11;
@@ -76,10 +77,6 @@ public class ChamRender
         target[0] = source[0] * scale;
         target[1] = source[1] * scale;
         target[2] = source[2] * scale;
-    }
-
-    public static void setTessellatorColor (WorldRenderer tessellator, float[] color) {
-        tessellator.setColorOpaque_F(color[0], color[1], color[2]);
     }
 
     void setWorldRenderer (WorldRenderer worldRenderer) {
@@ -267,10 +264,10 @@ public class ChamRender
         if (tessellator == null)
             return;
 
-        tessellator.setBrightness(FULL_BRIGHTNESS);
+        state.setBrightness(FULL_BRIGHTNESS);
 
         calculateBaseColor(colorScratch, blockState.getBlock().getRenderColor(blockState));
-        setTessellatorColor(tessellator, colorScratch);
+        state.setColor(colorScratch);
 
         boolean lighting = GL11.glIsEnabled(GL11.GL_LIGHTING);
         GL11.glDisable(GL11.GL_LIGHTING);
@@ -295,11 +292,10 @@ public class ChamRender
 
         Block block = blockState.getBlock();
 
-        //WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
-        tessellator.setBrightness(block.getMixedBrightnessForBlock(blockAccess, pos));
+        state.setBrightness(block.getMixedBrightnessForBlock(blockAccess, pos));
 
         calculateBaseColor(colorScratch, block.colorMultiplier(blockAccess, pos));
-        setTessellatorColor(tessellator, colorScratch);
+        state.setColor(colorScratch);
 
         drawCrossedSquares(icon, pos.getX(), pos.getY(), pos.getZ(), 1.0F);
     }
@@ -323,23 +319,23 @@ public class ChamRender
         double zMin = z + 0.5D - d7;
         double zMax = z + 0.5D + d7;
 
-        tessellator.addVertexWithUV(xMin, yMax, zMin, uMin, vMin);
-        tessellator.addVertexWithUV(xMin, yMin, zMin, uMin, vMax);
-        tessellator.addVertexWithUV(xMax, yMin, zMax, uMax, vMax);
-        tessellator.addVertexWithUV(xMax, yMax, zMax, uMax, vMin);
-        tessellator.addVertexWithUV(xMax, yMax, zMax, uMin, vMin);
-        tessellator.addVertexWithUV(xMax, yMin, zMax, uMin, vMax);
-        tessellator.addVertexWithUV(xMin, yMin, zMin, uMax, vMax);
-        tessellator.addVertexWithUV(xMin, yMax, zMin, uMax, vMin);
+        addBlockVertex(xMin, yMax, zMin, uMin, vMin);
+        addBlockVertex(xMin, yMin, zMin, uMin, vMax);
+        addBlockVertex(xMax, yMin, zMax, uMax, vMax);
+        addBlockVertex(xMax, yMax, zMax, uMax, vMin);
+        addBlockVertex(xMax, yMax, zMax, uMin, vMin);
+        addBlockVertex(xMax, yMin, zMax, uMin, vMax);
+        addBlockVertex(xMin, yMin, zMin, uMax, vMax);
+        addBlockVertex(xMin, yMax, zMin, uMax, vMin);
 
-        tessellator.addVertexWithUV(xMin, yMax, zMax, uMin, vMin);
-        tessellator.addVertexWithUV(xMin, yMin, zMax, uMin, vMax);
-        tessellator.addVertexWithUV(xMax, yMin, zMin, uMax, vMax);
-        tessellator.addVertexWithUV(xMax, yMax, zMin, uMax, vMin);
-        tessellator.addVertexWithUV(xMax, yMax, zMin, uMin, vMin);
-        tessellator.addVertexWithUV(xMax, yMin, zMin, uMin, vMax);
-        tessellator.addVertexWithUV(xMin, yMin, zMax, uMax, vMax);
-        tessellator.addVertexWithUV(xMin, yMax, zMax, uMax, vMin);
+        addBlockVertex(xMin, yMax, zMax, uMin, vMin);
+        addBlockVertex(xMin, yMin, zMax, uMin, vMax);
+        addBlockVertex(xMax, yMin, zMin, uMax, vMax);
+        addBlockVertex(xMax, yMax, zMin, uMax, vMin);
+        addBlockVertex(xMax, yMax, zMin, uMin, vMin);
+        addBlockVertex(xMax, yMin, zMin, uMin, vMax);
+        addBlockVertex(xMin, yMin, zMax, uMax, vMax);
+        addBlockVertex(xMin, yMax, zMax, uMax, vMin);
     }
 
     public void drawCrossedSquaresBounded(TextureAtlasSprite icon, double x, double y, double z, float scale)
@@ -369,46 +365,46 @@ public class ChamRender
         double uNN = icon.getInterpolatedU(xzNN * 16.0D);
         double uPP = icon.getInterpolatedU(xzPP * 16.0D);
 
-        tessellator.addVertexWithUV(xNN, yMax, zNN, uNN, vMin);
-        tessellator.addVertexWithUV(xNN, yMin, zNN, uNN, vMax);
-        tessellator.addVertexWithUV(xPP, yMin, zPP, uPP, vMax);
-        tessellator.addVertexWithUV(xPP, yMax, zPP, uPP, vMin);
+        addBlockVertex(xNN, yMax, zNN, uNN, vMin);
+        addBlockVertex(xNN, yMin, zNN, uNN, vMax);
+        addBlockVertex(xPP, yMin, zPP, uPP, vMax);
+        addBlockVertex(xPP, yMax, zPP, uPP, vMin);
 
         uNN = icon.getInterpolatedU(16 - xzNN * 16.0D);
         uPP = icon.getInterpolatedU(16 - xzPP * 16.0D);
 
-        tessellator.addVertexWithUV(xPP, yMax, zPP, uPP, vMin);
-        tessellator.addVertexWithUV(xPP, yMin, zPP, uPP, vMax);
-        tessellator.addVertexWithUV(xNN, yMin, zNN, uNN, vMax);
-        tessellator.addVertexWithUV(xNN, yMax, zNN, uNN, vMin);
+        addBlockVertex(xPP, yMax, zPP, uPP, vMin);
+        addBlockVertex(xPP, yMin, zPP, uPP, vMax);
+        addBlockVertex(xNN, yMin, zNN, uNN, vMax);
+        addBlockVertex(xNN, yMax, zNN, uNN, vMin);
 
         double uNP = icon.getInterpolatedU(Math.max(state.renderMinX, 1 - state.renderMaxZ) * 16.0D);
         double uPN = icon.getInterpolatedU(Math.min(state.renderMaxX, 1 - state.renderMinZ) * 16.0D);
 
-        tessellator.addVertexWithUV(xNP, yMax, zNP, uNP, vMin);
-        tessellator.addVertexWithUV(xNP, yMin, zNP, uNP, vMax);
-        tessellator.addVertexWithUV(xPN, yMin, zPN, uPN, vMax);
-        tessellator.addVertexWithUV(xPN, yMax, zPN, uPN, vMin);
+        addBlockVertex(xNP, yMax, zNP, uNP, vMin);
+        addBlockVertex(xNP, yMin, zNP, uNP, vMax);
+        addBlockVertex(xPN, yMin, zPN, uPN, vMax);
+        addBlockVertex(xPN, yMax, zPN, uPN, vMin);
 
         uNP = icon.getInterpolatedU(16 - Math.max(state.renderMinX, 1 - state.renderMaxZ) * 16.0D);
         uPN = icon.getInterpolatedU(16 - Math.min(state.renderMaxX, 1 - state.renderMinZ) * 16.0D);
 
-        tessellator.addVertexWithUV(xPN, yMax, zPN, uPN, vMin);
-        tessellator.addVertexWithUV(xPN, yMin, zPN, uPN, vMax);
-        tessellator.addVertexWithUV(xNP, yMin, zNP, uNP, vMax);
-        tessellator.addVertexWithUV(xNP, yMax, zNP, uNP, vMin);
+        addBlockVertex(xPN, yMax, zPN, uPN, vMin);
+        addBlockVertex(xPN, yMin, zPN, uPN, vMax);
+        addBlockVertex(xNP, yMin, zNP, uNP, vMax);
+        addBlockVertex(xNP, yMax, zNP, uNP, vMin);
     }
 
     private void setupColorMult (int face, float r, float g, float b) {
         if (tessellator == null)
             return;
-        //WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
+
         float[] rgb = rgbMap[face];
         float[] norm = normMap[face];
 
-        tessellator.setColorOpaque_F(rgb[0] * r, rgb[1] * g, rgb[2] * b);
-        tessellator.startDrawingQuads();
-        tessellator.setNormal(norm[0], norm[1], norm[2]);
+        state.setColor(rgb[0] * r, rgb[1] * g, rgb[2] * b);
+        state.setNormal(norm);
+        tessellator.begin(GL11.GL_QUADS, DefaultVertexFormats.ITEM);
 
         state.enableAO = false;
     }
@@ -423,8 +419,8 @@ public class ChamRender
 
         if (blockAccess == null) {
             //tessellator.startDrawingQuads();
-            tessellator.setColorOpaque_F(r, g, b);
-            tessellator.setNormal(norm[0], norm[1], norm[2]);
+            state.setColor(r, g, b);
+            state.setNormal(norm);
         }
         else {
             int brightX = pos.getX();
@@ -443,8 +439,8 @@ public class ChamRender
             if (brightX != pos.getX() || brightY != pos.getY() || brightZ != pos.getZ())
                 pos = new BlockPos(brightX, brightY, brightZ);
 
-            tessellator.setColorOpaque_F(rgb[0] * r, rgb[1] * g, rgb[2] * b);
-            tessellator.setBrightness(blockState.getBlock().getMixedBrightnessForBlock(blockAccess, pos));
+            state.setColor(rgb[0] * r, rgb[1] * g, rgb[2] * b);
+            state.setBrightness(blockState.getBlock().getMixedBrightnessForBlock(blockAccess, pos));
         }
 
         state.enableAO = false;
@@ -452,5 +448,17 @@ public class ChamRender
 
     private TextureAtlasSprite getDefaultSprite () {
         return ((TextureMap) Minecraft.getMinecraft().getTextureManager().getTexture(TextureMap.locationBlocksTexture)).getAtlasSprite("missingno");
+    }
+
+    private void addBlockVertex (double x, double y, double z, double u, double v) {
+
+        if (tessellator.getVertexFormat().hasNormal()) {
+            tessellator.pos(x, y, z).tex(u, v).normal(state.normal[0], state.normal[1], state.normal[2]).color(state.color[0], state.color[1], state.color[2], 1).endVertex();
+        }
+        else {
+            int lsky = (state.brightness >> 16) & 255;
+            int lblk = (state.brightness & 255);
+            tessellator.pos(x, y, z).tex(u, v).lightmap(lsky, lblk).color(state.color[0], state.color[1], state.color[2], 1).endVertex();
+        }
     }
 }

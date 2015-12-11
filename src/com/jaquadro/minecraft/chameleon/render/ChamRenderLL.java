@@ -359,41 +359,29 @@ public class ChamRenderLL
     }
 
     private void renderXYZUV (int[][] index) {
-        WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
-
-        int[] tl = index[TL];
-        int[] bl = index[BL];
-        int[] br = index[BR];
-        int[] tr = index[TR];
-
-        tessellator.addVertexWithUV(xyz[tl[0]], xyz[tl[1]], xyz[tl[2]], uv[tl[3]], uv[tl[4]]);
-        tessellator.addVertexWithUV(xyz[bl[0]], xyz[bl[1]], xyz[bl[2]], uv[bl[3]], uv[bl[4]]);
-        tessellator.addVertexWithUV(xyz[br[0]], xyz[br[1]], xyz[br[2]], uv[br[3]], uv[br[4]]);
-        tessellator.addVertexWithUV(xyz[tr[0]], xyz[tr[1]], xyz[tr[2]], uv[tr[3]], uv[tr[4]]);
+        setBlockVertex(index[TL], state.color, state.brightness);
+        setBlockVertex(index[BL], state.color, state.brightness);
+        setBlockVertex(index[BR], state.color, state.brightness);
+        setBlockVertex(index[TR], state.color, state.brightness);
     }
 
     private void renderXYZUVAO (int[][] index) {
+        setBlockVertex(index[TL], state.colorTopLeft, state.brightnessTopLeft);
+        setBlockVertex(index[BL], state.colorBottomLeft, state.brightnessBottomLeft);
+        setBlockVertex(index[BR], state.colorBottomRight, state.brightnessBottomRight);
+        setBlockVertex(index[TR], state.colorTopRight, state.brightnessTopRight);
+    }
+
+    private void setBlockVertex (int[] xumap, float[] color, int brightness) {
         WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
 
-        int[] tl = index[TL];
-        int[] bl = index[BL];
-        int[] br = index[BR];
-        int[] tr = index[TR];
+        int lsky = (brightness >> 16) & 255;
+        int lblk = (brightness & 255);
 
-        tessellator.setColorOpaque_F(state.colorTopLeft[0], state.colorTopLeft[1], state.colorTopLeft[2]);
-        tessellator.setBrightness(state.brightnessTopLeft);
-        tessellator.addVertexWithUV(xyz[tl[0]], xyz[tl[1]], xyz[tl[2]], uv[tl[3]], uv[tl[4]]);
-
-        tessellator.setColorOpaque_F(state.colorBottomLeft[0], state.colorBottomLeft[1], state.colorBottomLeft[2]);
-        tessellator.setBrightness(state.brightnessBottomLeft);
-        tessellator.addVertexWithUV(xyz[bl[0]], xyz[bl[1]], xyz[bl[2]], uv[bl[3]], uv[bl[4]]);
-
-        tessellator.setColorOpaque_F(state.colorBottomRight[0], state.colorBottomRight[1], state.colorBottomRight[2]);
-        tessellator.setBrightness(state.brightnessBottomRight);
-        tessellator.addVertexWithUV(xyz[br[0]], xyz[br[1]], xyz[br[2]], uv[br[3]], uv[br[4]]);
-
-        tessellator.setColorOpaque_F(state.colorTopRight[0], state.colorTopRight[1], state.colorTopRight[2]);
-        tessellator.setBrightness(state.brightnessTopRight);
-        tessellator.addVertexWithUV(xyz[tr[0]], xyz[tr[1]], xyz[tr[2]], uv[tr[3]], uv[tr[4]]);
+        tessellator.pos(xyz[xumap[0]], xyz[xumap[1]], xyz[xumap[2]])
+            .tex(uv[xumap[3]], uv[xumap[4]])
+            .lightmap(lsky, lblk)
+            .color(color[0], color[1], color[2], 1)
+            .endVertex();
     }
 }
