@@ -375,13 +375,22 @@ public class ChamRenderLL
     private void setBlockVertex (int[] xumap, float[] color, int brightness) {
         WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
 
-        int lsky = (brightness >> 16) & 255;
-        int lblk = (brightness & 255);
+        if (tessellator.getVertexFormat().hasNormal()) {
+            tessellator.pos(xyz[xumap[0]], xyz[xumap[1]], xyz[xumap[2]])
+                .color(color[0], color[1], color[2], 1)
+                .tex(uv[xumap[3]], uv[xumap[4]])
+                .normal(state.normal[0], state.normal[1], state.normal[2])
+                .endVertex();
+        }
+        else {
+            int lsky = (brightness >> 16) & 255;
+            int lblk = (brightness & 255);
 
-        tessellator.pos(xyz[xumap[0]], xyz[xumap[1]], xyz[xumap[2]])
-            .tex(uv[xumap[3]], uv[xumap[4]])
-            .lightmap(lsky, lblk)
-            .color(color[0], color[1], color[2], 1)
-            .endVertex();
+            tessellator.pos(xyz[xumap[0]], xyz[xumap[1]], xyz[xumap[2]])
+                .tex(uv[xumap[3]], uv[xumap[4]])
+                .lightmap(lsky, lblk)
+                .color(color[0], color[1], color[2], 1)
+                .endVertex();
+        }
     }
 }

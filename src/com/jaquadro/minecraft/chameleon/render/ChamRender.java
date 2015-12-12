@@ -396,9 +396,10 @@ public class ChamRender
     }
 
     private void setupColorMult (int face, float r, float g, float b) {
-        if (tessellator == null)
-            return;
+        //if (tessellator == null)
+        //    return;
 
+        WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
         float[] rgb = rgbMap[face];
         float[] norm = normMap[face];
 
@@ -410,15 +411,15 @@ public class ChamRender
     }
 
     private void setupColorMult (int face, IBlockAccess blockAccess, IBlockState blockState, BlockPos pos, float r, float g, float b) {
-        if (tessellator == null)
-            return;
+        //if (tessellator == null)
+        //    return;
 
-        //WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
+        WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
         float[] rgb = rgbMap[face];
         float[] norm = normMap[face];
 
         if (blockAccess == null) {
-            //tessellator.startDrawingQuads();
+            tessellator.begin(GL11.GL_QUADS, DefaultVertexFormats.ITEM);
             state.setColor(r, g, b);
             state.setNormal(norm);
         }
