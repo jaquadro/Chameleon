@@ -64,7 +64,7 @@ public class ChamRenderManager
 
             try {
                 worldRenderer.finishDrawing();
-                this.vboUploader.func_181679_a(worldRenderer);
+                this.vboUploader.draw(worldRenderer);
             } catch (IllegalStateException e) {
             }
 
