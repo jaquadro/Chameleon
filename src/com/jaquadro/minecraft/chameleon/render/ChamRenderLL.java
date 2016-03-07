@@ -2,7 +2,16 @@ package com.jaquadro.minecraft.chameleon.render;
 
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.renderer.vertex.VertexFormat;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.MathHelper;
+
+import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ChamRenderLL
 {
@@ -67,12 +76,39 @@ public class ChamRenderLL
     // x-min, x-max, y-min, y-max, z-min, z-max
     private double[] xyz = new double[6];
 
+    private boolean isBaking;
+    private VertexFormat bakedFormat;
+    private int bakedTintIndex = -1;
+    private List<BakedQuad> quadBuffer;
+
     public ChamRenderLL (ChamRenderState state) {
         this.state = state;
     }
 
-    public void drawFace (int face, double x, double y, double z, TextureAtlasSprite icon) {
-        switch (face) {
+    public void startBaking (VertexFormat format) {
+        startBaking(format, -1);
+    }
+
+    public void startBaking (VertexFormat format, int tintIndex) {
+        isBaking = true;
+        quadBuffer = new ArrayList<BakedQuad>();
+        bakedFormat = format;
+        bakedTintIndex = tintIndex;
+    }
+
+    public List<BakedQuad> stopBaking () {
+        isBaking = false;
+        List<BakedQuad> result = quadBuffer;
+        quadBuffer = null;
+        return result;
+    }
+
+    public VertexFormat getVertexFormat () {
+        return bakedFormat;
+    }
+
+    public void drawFace (EnumFacing face, double x, double y, double z, TextureAtlasSprite icon) {
+        switch (face.getIndex()) {
             case ChamRender.YNEG:
             case ChamRender.YPOS:
                 drawFaceY(face, x, y, z, icon);
@@ -88,7 +124,7 @@ public class ChamRenderLL
         }
     }
 
-    private void drawFaceY (int face, double x, double y, double z, TextureAtlasSprite icon) {
+    private void drawFaceY (EnumFacing face, double x, double y, double z, TextureAtlasSprite icon) {
         int rangeX = (int)(Math.ceil(state.renderMaxX + state.shiftU) - Math.floor(state.renderMinX + state.shiftU));
         int rangeZ = (int)(Math.ceil(state.renderMaxZ + state.shiftV) - Math.floor(state.renderMinZ + state.shiftV));
 
@@ -102,9 +138,9 @@ public class ChamRenderLL
             setUV(icon, state.renderMinX + state.shiftU, state.renderMinZ + state.shiftV, state.renderMaxX + state.shiftU, state.renderMaxZ + state.shiftV);
 
             if (state.enableAO)
-                renderXYZUVAO(xyzuvMap[face]);
+                renderXYZUVAO(face);
             else
-                renderXYZUV(xyzuvMap[face]);
+                renderXYZUV(face);
             return;
         }
 
@@ -116,7 +152,7 @@ public class ChamRenderLL
         setupUVPoints(uStart, vStart, uStop, vStop, rangeX, rangeZ);
         setupAOBrightnessLerp(state.renderMinX, state.renderMaxX, state.renderMinZ, state.renderMaxZ, rangeX, rangeZ);
 
-        int rotate = (face == 0) ? state.uvRotate[0] : state.uvRotate[1];
+        int rotate = (face == EnumFacing.DOWN) ? state.uvRotate[0] : state.uvRotate[1];
 
         for (int ix = 0; ix < rangeX; ix++) {
             xyz[MAXX] = xyz[MINX] + maxUDiv[ix] - minUDiv[ix];
@@ -145,7 +181,7 @@ public class ChamRenderLL
                         break;
                 }
 
-                renderXYZUVAO(xyzuvMap[face]);
+                renderXYZUVAO(face);
 
                 xyz[MINZ] = xyz[MAXZ];
             }
@@ -153,7 +189,7 @@ public class ChamRenderLL
         }
     }
 
-    private void drawFaceZ (int face, double x, double y, double z, TextureAtlasSprite icon) {
+    private void drawFaceZ (EnumFacing face, double x, double y, double z, TextureAtlasSprite icon) {
         int rangeX = (int)(Math.ceil(state.renderMaxX + state.shiftU) - Math.floor(state.renderMinX + state.shiftU));
         int rangeY = (int)(Math.ceil(state.renderMaxY + state.shiftV) - Math.floor(state.renderMinY + state.shiftV));
 
@@ -170,9 +206,9 @@ public class ChamRenderLL
                 setUV(icon, state.renderMinX + state.shiftU, 1 - state.renderMaxY + state.shiftV, state.renderMaxX + state.shiftU, 1 - state.renderMinY + state.shiftV);
 
             if (state.enableAO)
-                renderXYZUVAO(xyzuvMap[face]);
+                renderXYZUVAO(face);
             else
-                renderXYZUV(xyzuvMap[face]);
+                renderXYZUV(face);
             return;
         }
 
@@ -201,7 +237,7 @@ public class ChamRenderLL
                 else
                     setUV(icon, minUDiv[ix], minVDiv[iy], maxUDiv[ix], maxVDiv[iy]);
 
-                renderXYZUVAO(xyzuvMap[face]);
+                renderXYZUVAO(face);
 
                 xyz[MINY] = xyz[MAXY];
             }
@@ -209,7 +245,7 @@ public class ChamRenderLL
         }
     }
 
-    private void drawFaceX (int face, double x, double y, double z, TextureAtlasSprite icon) {
+    private void drawFaceX (EnumFacing face, double x, double y, double z, TextureAtlasSprite icon) {
         int rangeZ = (int)(Math.ceil(state.renderMaxZ + state.shiftU) - Math.floor(state.renderMinZ + state.shiftU));
         int rangeY = (int)(Math.ceil(state.renderMaxY + state.shiftV) - Math.floor(state.renderMinY + state.shiftV));
 
@@ -227,9 +263,9 @@ public class ChamRenderLL
                 setUV(icon, state.renderMinZ + state.shiftU, 1 - state.renderMaxY + state.shiftV, state.renderMaxZ + state.shiftU, 1 - state.renderMinY + state.shiftV);
 
             if (state.enableAO)
-                renderXYZUVAO(xyzuvMap[face]);
+                renderXYZUVAO(face);
             else
-                renderXYZUV(xyzuvMap[face]);
+                renderXYZUV(face);
             return;
         }
 
@@ -258,7 +294,7 @@ public class ChamRenderLL
                 else
                     setUV(icon, minUDiv[iz], minVDiv[iy], maxUDiv[iz], maxVDiv[iy]);
 
-                renderXYZUVAO(xyzuvMap[face]);
+                renderXYZUVAO(face);
 
                 xyz[MINY] = xyz[MAXY];
             }
@@ -266,14 +302,14 @@ public class ChamRenderLL
         }
     }
 
-    public void drawPartialFace (int face, double x, double y, double z, TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax) {
+    public void drawPartialFace (EnumFacing face, double x, double y, double z, TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax) {
         setXYZ(x, y, z);
         setUV(icon, uMin, vMin, uMax, vMax);
 
         if (state.enableAO)
-            renderXYZUVAO(xyzuvMap[face]);
+            renderXYZUVAO(face);
         else
-            renderXYZUV(xyzuvMap[face]);
+            renderXYZUV(face);
     }
 
     private void setupUVPoints (double uStart, double vStart, double uStop, double vStop, int rangeU, int rangeV) {
@@ -358,14 +394,33 @@ public class ChamRenderLL
         xyz[5] = z + state.renderMaxZ;
     }
 
-    private void renderXYZUV (int[][] index) {
+    private void renderXYZUV (EnumFacing facing) {
+        if (isBaking) {
+            if (bakedFormat == DefaultVertexFormats.BLOCK)
+                quadBuffer.add(bakeXYZUVBlock(facing, state.color, state.color, state.color, state.color));
+            else if (bakedFormat == DefaultVertexFormats.ITEM)
+                quadBuffer.add(bakeXYZUVItem(facing, state.color, state.color, state.color, state.color));
+            return;
+        }
+
+        int[][] index = xyzuvMap[facing.getIndex()];
         setBlockVertex(index[TL], state.color, state.brightness);
         setBlockVertex(index[BL], state.color, state.brightness);
         setBlockVertex(index[BR], state.color, state.brightness);
         setBlockVertex(index[TR], state.color, state.brightness);
     }
 
-    private void renderXYZUVAO (int[][] index) {
+    private void renderXYZUVAO (EnumFacing facing) {
+
+        if (isBaking) {
+            if (bakedFormat == DefaultVertexFormats.BLOCK)
+                quadBuffer.add(bakeXYZUVBlock(facing, state.color, state.color, state.color, state.color));
+            else if (bakedFormat == DefaultVertexFormats.ITEM)
+                quadBuffer.add(bakeXYZUVItem(facing, state.color, state.color, state.color, state.color));
+            return;
+        }
+
+        int[][] index = xyzuvMap[facing.getIndex()];
         setBlockVertex(index[TL], state.colorTopLeft, state.brightnessTopLeft);
         setBlockVertex(index[BL], state.colorBottomLeft, state.brightnessBottomLeft);
         setBlockVertex(index[BR], state.colorBottomRight, state.brightnessBottomRight);
@@ -392,5 +447,110 @@ public class ChamRenderLL
                 .color(color[0], color[1], color[2], 1)
                 .endVertex();
         }
+    }
+
+    private BakedQuad bakeXYZUVBlock (EnumFacing facing, float[] colorTL, float[] colorBL, float[] colorBR, float[] colorTR) {
+        int[][] index = xyzuvMap[facing.getIndex()];
+        int[] mapTL = index[TL];
+        int[] mapBL = index[BL];
+        int[] mapBR = index[BR];
+        int[] mapTR = index[TR];
+
+        int light = 0xFFFFFFFF;
+
+        return new BakedQuad(new int[] {
+            Float.floatToRawIntBits((float)xyz[mapTL[0]]),
+            Float.floatToRawIntBits((float)xyz[mapTL[1]]),
+            Float.floatToRawIntBits((float)xyz[mapTL[2]]),
+            packColor(colorTL),
+            Float.floatToRawIntBits((float)uv[mapTL[3]]),
+            Float.floatToRawIntBits((float)uv[mapTL[4]]),
+            light,
+
+            Float.floatToRawIntBits((float)xyz[mapBL[0]]),
+            Float.floatToRawIntBits((float)xyz[mapBL[1]]),
+            Float.floatToRawIntBits((float)xyz[mapBL[2]]),
+            packColor(colorBL),
+            Float.floatToRawIntBits((float)uv[mapBL[3]]),
+            Float.floatToRawIntBits((float)uv[mapBL[4]]),
+            light,
+
+            Float.floatToRawIntBits((float)xyz[mapBR[0]]),
+            Float.floatToRawIntBits((float)xyz[mapBR[1]]),
+            Float.floatToRawIntBits((float)xyz[mapBR[2]]),
+            packColor(colorBR),
+            Float.floatToRawIntBits((float)uv[mapBR[3]]),
+            Float.floatToRawIntBits((float)uv[mapBR[4]]),
+            light,
+
+            Float.floatToRawIntBits((float)xyz[mapTR[0]]),
+            Float.floatToRawIntBits((float)xyz[mapTR[1]]),
+            Float.floatToRawIntBits((float)xyz[mapTR[2]]),
+            packColor(colorTR),
+            Float.floatToRawIntBits((float)uv[mapTR[3]]),
+            Float.floatToRawIntBits((float)uv[mapTR[4]]),
+            light
+        }, -1, facing);
+    }
+
+    private BakedQuad bakeXYZUVItem (EnumFacing facing, float[] colorTL, float[] colorBL, float[] colorBR, float[] colorTR) {
+        int[][] index = xyzuvMap[facing.getIndex()];
+        int[] mapTL = index[TL];
+        int[] mapBL = index[BL];
+        int[] mapBR = index[BR];
+        int[] mapTR = index[TR];
+
+        return new BakedQuad(new int[] {
+            Float.floatToRawIntBits((float)xyz[mapTL[0]]),
+            Float.floatToRawIntBits((float)xyz[mapTL[1]]),
+            Float.floatToRawIntBits((float)xyz[mapTL[2]]),
+            packColor(colorTL),
+            Float.floatToRawIntBits((float)uv[mapTL[3]]),
+            Float.floatToRawIntBits((float)uv[mapTL[4]]),
+            packNormal(state.normal),
+
+            Float.floatToRawIntBits((float)xyz[mapBL[0]]),
+            Float.floatToRawIntBits((float)xyz[mapBL[1]]),
+            Float.floatToRawIntBits((float)xyz[mapBL[2]]),
+            packColor(colorBL),
+            Float.floatToRawIntBits((float)uv[mapBL[3]]),
+            Float.floatToRawIntBits((float)uv[mapBL[4]]),
+            packNormal(state.normal),
+
+            Float.floatToRawIntBits((float)xyz[mapBR[0]]),
+            Float.floatToRawIntBits((float)xyz[mapBR[1]]),
+            Float.floatToRawIntBits((float)xyz[mapBR[2]]),
+            packColor(colorBR),
+            Float.floatToRawIntBits((float)uv[mapBR[3]]),
+            Float.floatToRawIntBits((float)uv[mapBR[4]]),
+            packNormal(state.normal),
+
+            Float.floatToRawIntBits((float)xyz[mapTR[0]]),
+            Float.floatToRawIntBits((float)xyz[mapTR[1]]),
+            Float.floatToRawIntBits((float)xyz[mapTR[2]]),
+            packColor(colorTR),
+            Float.floatToRawIntBits((float)uv[mapTR[3]]),
+            Float.floatToRawIntBits((float)uv[mapTR[4]]),
+            packNormal(state.normal)
+        }, -1, facing);
+    }
+
+    private int packColor (float[] color) {
+        int r = MathHelper.clamp_int((int)(color[0] * 255), 0, 255);
+        int g = MathHelper.clamp_int((int)(color[1] * 255), 0, 255);
+        int b = MathHelper.clamp_int((int)(color[2] * 255), 0, 255);
+
+        return (255 << 24 | r << 16 | g << 8 | b);
+    }
+
+    private int packNormal (float[] normal) {
+        int nx = (int)(normal[0] * 127) & 255;
+        int ny = (int)(normal[1] * 127) & 255;
+        int nz = (int)(normal[2] * 127) & 255;
+
+        if (ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN)
+            return nx | ny << 8 | nz << 16;
+        else
+            return nx << 24 | ny << 16 | nz << 8;
     }
 }
