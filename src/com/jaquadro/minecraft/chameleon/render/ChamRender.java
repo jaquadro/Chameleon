@@ -242,6 +242,19 @@ public class ChamRender
             Tessellator.getInstance().draw();
     }
 
+    public void bakePartialFace (EnumFacing face, IBlockState blockState, TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax) {
+        calculateBaseColor(colorScratch, blockState.getBlock().getRenderColor(blockState));
+        bakePartialFace(face, blockState, icon, uMin, vMin, uMax, vMax, colorScratch[0], colorScratch[1], colorScratch[2]);
+    }
+
+    public void bakePartialFace (EnumFacing face, IBlockState blockState, TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax, float r, float g, float b) {
+        state.setColor(r, g, b);
+        state.setNormal(normMap[face.getIndex()]);
+
+        face = EnumFacing.getFront(ChamRenderState.FACE_BY_FACE_ROTATION[face.getIndex()][state.rotateTransform]);
+        llHelper.drawPartialFace(face, 0, 0, 0, icon, uMin, vMin, uMax, vMax);
+    }
+
     public void renderPartialFaceAOPartial (EnumFacing face, IBlockAccess blockAccess, IBlockState blockState, BlockPos pos, TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax, float r, float g, float b) {
         state.enableAO = true;
 
