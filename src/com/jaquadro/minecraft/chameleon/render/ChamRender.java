@@ -36,15 +36,6 @@ public class ChamRender
 
     public static final int FULL_BRIGHTNESS = 15728880;
 
-    private static final float rgbMap[][] = {
-        { 0.5f, 0.5f, 0.5f },
-        { 1.0f, 1.0f, 1.0f },
-        { 0.8f, 0.8f, 0.8f },
-        { 0.8f, 0.8f, 0.8f },
-        { 0.6f, 0.6f, 0.6f },
-        { 0.6f, 0.6f, 0.6f },
-    };
-
     private static final float normMap[][] = {
         { 0, -1, 0 },
         { 0, 1, 0 },
@@ -344,6 +335,10 @@ public class ChamRender
             return;
         //WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
 
+        x += state.renderOffsetX;
+        y += state.renderOffsetY;
+        z += state.renderOffsetZ;
+
         double uMin = icon.getInterpolatedU(state.renderMinX * 16.0D);
         double uMax = icon.getInterpolatedU(state.renderMaxX * 16.0D);
         double vMin = icon.getInterpolatedV(16 - state.renderMaxY * 16.0D);
@@ -381,6 +376,10 @@ public class ChamRender
         if (tessellator == null)
             return;
         //WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
+
+        x += state.renderOffsetX;
+        y += state.renderOffsetY;
+        z += state.renderOffsetZ;
 
         double vMin = icon.getInterpolatedV(16 - state.renderMaxY * 16.0D);
         double vMax = icon.getInterpolatedV(16 - state.renderMinY * 16.0D);
@@ -452,10 +451,10 @@ public class ChamRender
         //    return;
 
         WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
-        float[] rgb = rgbMap[face.getIndex()];
         float[] norm = normMap[face.getIndex()];
+        float scale = state.getColorMult(face);
 
-        state.setColor(rgb[0] * r, rgb[1] * g, rgb[2] * b);
+        state.setColor(scale * r, scale * g, scale * b);
         state.setNormal(norm);
         tessellator.begin(GL11.GL_QUADS, DefaultVertexFormats.ITEM);
 
@@ -467,8 +466,8 @@ public class ChamRender
         //    return;
 
         WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
-        float[] rgb = rgbMap[face.getIndex()];
         float[] norm = normMap[face.getIndex()];
+        float scale = state.getColorMult(face);
 
         if (blockAccess == null) {
             tessellator.begin(GL11.GL_QUADS, DefaultVertexFormats.ITEM);
@@ -492,7 +491,7 @@ public class ChamRender
             if (brightX != pos.getX() || brightY != pos.getY() || brightZ != pos.getZ())
                 pos = new BlockPos(brightX, brightY, brightZ);
 
-            state.setColor(rgb[0] * r, rgb[1] * g, rgb[2] * b);
+            state.setColor(scale * r, scale * g, scale * b);
             state.setBrightness(blockState.getBlock().getMixedBrightnessForBlock(blockAccess, pos));
         }
 

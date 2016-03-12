@@ -29,35 +29,35 @@ public class ChamRenderLL
 
     private static final int xyzuvMap[][][] = {
         {       // Y-NEG
-            { 0, 2, 5, 0, 3 },
-            { 0, 2, 4, 0, 2 },
-            { 1, 2, 4, 1, 2 },
-            { 1, 2, 5, 1, 3 }
+            { 0, 2, 5, 0, 2 },
+            { 0, 2, 4, 0, 3 },
+            { 1, 2, 4, 1, 3 },
+            { 1, 2, 5, 1, 2 }
         }, {    // Y-POS
-            { 1, 3, 5, 1, 3 },
-            { 1, 3, 4, 1, 2 },
-            { 0, 3, 4, 0, 2 },
-            { 0, 3, 5, 0, 3 }
+            { 1, 3, 5, 0, 2 },
+            { 1, 3, 4, 0, 3 },
+            { 0, 3, 4, 1, 3 },
+            { 0, 3, 5, 1, 2 }
         }, {    // Z-NEG
-            { 0, 3, 4, 1, 2 },
-            { 1, 3, 4, 0, 2 },
-            { 1, 2, 4, 0, 3 },
-            { 0, 2, 4, 1, 3 }
+            { 0, 3, 4, 0, 2 },
+            { 1, 3, 4, 1, 2 },
+            { 1, 2, 4, 1, 3 },
+            { 0, 2, 4, 0, 3 }
         }, {    // Z-POS
             { 0, 3, 5, 0, 2 },
             { 0, 2, 5, 0, 3 },
             { 1, 2, 5, 1, 3 },
             { 1, 3, 5, 1, 2 }
         }, {    // X-NEG
-            { 0, 3, 5, 1, 2 },
-            { 0, 3, 4, 0, 2 },
-            { 0, 2, 4, 0, 3 },
-            { 0, 2, 5, 1, 3 }
+            { 0, 3, 5, 0, 2 },
+            { 0, 3, 4, 1, 2 },
+            { 0, 2, 4, 1, 3 },
+            { 0, 2, 5, 0, 3 }
         }, {    // X-POS
-            { 1, 2, 5, 0, 3 },
-            { 1, 2, 4, 1, 3 },
-            { 1, 3, 4, 1, 2 },
-            { 1, 3, 5, 0, 2 }
+            { 1, 2, 5, 0, 2 },
+            { 1, 2, 4, 1, 2 },
+            { 1, 3, 4, 1, 3 },
+            { 1, 3, 5, 0, 3 }
         },
     };
 
@@ -108,6 +108,8 @@ public class ChamRenderLL
     }
 
     public void drawFace (EnumFacing face, double x, double y, double z, TextureAtlasSprite icon) {
+        boolean flip = state.flipTexture;
+
         switch (face.getIndex()) {
             case ChamRender.YNEG:
             case ChamRender.YPOS:
@@ -115,16 +117,25 @@ public class ChamRenderLL
                 break;
             case ChamRender.ZNEG:
             case ChamRender.ZPOS:
+                if (state.rotateTransform == ChamRenderState.ROTATE180 || state.rotateTransform == ChamRenderState.ROTATE90)
+                    state.flipTexture = !state.flipTexture;
                 drawFaceZ(face, x, y, z, icon);
                 break;
             case ChamRender.XNEG:
             case ChamRender.XPOS:
+                if (state.rotateTransform == ChamRenderState.ROTATE180 || state.rotateTransform == ChamRenderState.ROTATE270)
+                    state.flipTexture = !state.flipTexture;
                 drawFaceX(face, x, y, z, icon);
                 break;
         }
+
+        state.flipTexture = flip;
     }
 
     private void drawFaceY (EnumFacing face, double x, double y, double z, TextureAtlasSprite icon) {
+        if (icon == null)
+            return;
+
         int rangeX = (int)(Math.ceil(state.renderMaxX + state.shiftU) - Math.floor(state.renderMinX + state.shiftU));
         int rangeZ = (int)(Math.ceil(state.renderMaxZ + state.shiftV) - Math.floor(state.renderMinZ + state.shiftV));
 
@@ -134,8 +145,13 @@ public class ChamRenderLL
             xyz[MAXX] = z + state.renderMinX;
         }
 
+        int rotate = (face == ChamRender.FACE_YNEG) ? state.uvRotate[ChamRender.YNEG] : state.uvRotate[ChamRender.YPOS];
+
         if (rangeX <= 1 && rangeZ <= 1) {
-            setUV(icon, state.renderMinX + state.shiftU, state.renderMinZ + state.shiftV, state.renderMaxX + state.shiftU, state.renderMaxZ + state.shiftV);
+            if (face == ChamRender.FACE_YNEG)
+                setFaceYNegUV(icon, state.renderMinX, state.renderMinZ, state.renderMaxX, state.renderMaxZ);
+            else
+                setFaceYPosUV(icon, state.renderMinX, state.renderMinZ, state.renderMaxX, state.renderMaxZ);
 
             if (state.enableAO)
                 renderXYZUVAO(face);
@@ -152,8 +168,6 @@ public class ChamRenderLL
         setupUVPoints(uStart, vStart, uStop, vStop, rangeX, rangeZ);
         setupAOBrightnessLerp(state.renderMinX, state.renderMaxX, state.renderMinZ, state.renderMaxZ, rangeX, rangeZ);
 
-        int rotate = (face == EnumFacing.DOWN) ? state.uvRotate[0] : state.uvRotate[1];
-
         for (int ix = 0; ix < rangeX; ix++) {
             xyz[MAXX] = xyz[MINX] + maxUDiv[ix] - minUDiv[ix];
             xyz[MINZ] = z + state.renderMinZ;
@@ -168,16 +182,16 @@ public class ChamRenderLL
 
                 switch (rotate) {
                     case ChamRenderState.ROTATE90:
-                        setUV(icon, maxVDiv[ix], minUDiv[iz], minVDiv[ix], maxUDiv[iz]);
+                        setUV(icon, maxVDiv[ix], minVDiv[ix], minUDiv[iz], maxUDiv[iz]);
                         break;
                     case ChamRenderState.ROTATE180:
-                        setUV(icon, maxUDiv[ix], maxVDiv[iz], minUDiv[ix], minVDiv[iz]);
+                        setUV(icon, maxUDiv[ix], minUDiv[ix], maxVDiv[iz], minVDiv[iz]);
                         break;
                     case ChamRenderState.ROTATE270:
-                        setUV(icon, minVDiv[ix], maxUDiv[iz], maxVDiv[ix], minUDiv[iz]);
+                        setUV(icon, minVDiv[ix], maxVDiv[ix], maxUDiv[iz], minUDiv[iz]);
                         break;
                     default:
-                        setUV(icon, minUDiv[ix], minVDiv[iz], maxUDiv[ix], maxVDiv[iz]);
+                        setUV(icon, minUDiv[ix], maxUDiv[ix], minVDiv[iz], maxVDiv[iz]);
                         break;
                 }
 
@@ -189,7 +203,34 @@ public class ChamRenderLL
         }
     }
 
+    private void setFaceYNegUV (TextureAtlasSprite icon, double minX, double minZ, double maxX, double maxZ) {
+        int rotate = state.uvRotate[ChamRender.YNEG];
+        if (rotate == ChamRenderState.ROTATE0)
+            setUV(icon, minX + state.shiftU, maxX + state.shiftU, maxZ + state.shiftV, minZ + state.shiftV);
+        if (rotate == ChamRenderState.ROTATE90)
+            setUV(icon, 1 - maxZ + state.shiftU, 1 - minZ + state.shiftU, minX + state.shiftV, maxX + state.shiftV);
+        if (rotate == ChamRenderState.ROTATE180)
+            setUV(icon, 1 - minX + state.shiftU, 1 - maxX + state.shiftU, 1 - maxZ + state.shiftV, 1 - minZ + state.shiftV);
+        if (rotate == ChamRenderState.ROTATE270)
+            setUV(icon, maxZ + state.shiftU, minZ + state.shiftU, 1 - minX + state.shiftV, 1 - maxX + state.shiftV);
+    }
+
+    private void setFaceYPosUV (TextureAtlasSprite icon, double minX, double minZ, double maxX, double maxZ) {
+        int rotate = state.uvRotate[ChamRender.YPOS];
+        if (rotate == ChamRenderState.ROTATE0)
+            setUV(icon, maxX + state.shiftU, minX + state.shiftU, maxZ + state.shiftV, minZ + state.shiftV);
+        if (rotate == ChamRenderState.ROTATE90)
+            setUV(icon, maxZ + state.shiftU, minZ + state.shiftU, 1 - maxX + state.shiftV, 1 - minX + state.shiftV);
+        if (rotate == ChamRenderState.ROTATE180)
+            setUV(icon, 1 - maxX + state.shiftU, 1 - minX + state.shiftU, 1 - maxZ + state.shiftV, 1 - minZ + state.shiftV);
+        if (rotate == ChamRenderState.ROTATE270)
+            setUV(icon, 1 - maxZ + state.shiftU, 1 - minZ + state.shiftU, maxX + state.shiftV, minX + state.shiftV);
+    }
+
     private void drawFaceZ (EnumFacing face, double x, double y, double z, TextureAtlasSprite icon) {
+        if (icon == null)
+            return;
+
         int rangeX = (int)(Math.ceil(state.renderMaxX + state.shiftU) - Math.floor(state.renderMinX + state.shiftU));
         int rangeY = (int)(Math.ceil(state.renderMaxY + state.shiftV) - Math.floor(state.renderMinY + state.shiftV));
 
@@ -200,10 +241,17 @@ public class ChamRenderLL
         }
 
         if (rangeX <= 1 && rangeY <= 1) {
-            if (state.flipTexture)
-                setUV(icon, state.renderMaxX + state.shiftU, 1 - state.renderMaxY + state.shiftV, state.renderMinX + state.shiftU, 1 - state.renderMinY + state.shiftV);
+            double minX = state.renderMinX;
+            double maxX = state.renderMaxX;
+            if (state.flipTexture) {
+                minX = state.renderMaxX;
+                maxX = state.renderMinX;
+            }
+
+            if (face == ChamRender.FACE_ZNEG)
+                setFaceZNegUV(icon, minX, state.renderMinY, maxX, state.renderMaxY);
             else
-                setUV(icon, state.renderMinX + state.shiftU, 1 - state.renderMaxY + state.shiftV, state.renderMaxX + state.shiftU, 1 - state.renderMinY + state.shiftV);
+                setFaceZPosUV(icon, minX, state.renderMinY, maxX, state.renderMaxY);
 
             if (state.enableAO)
                 renderXYZUVAO(face);
@@ -233,9 +281,9 @@ public class ChamRenderLL
                 state.brightnessBottomRight = brightnessLerp[ix + 1][iy + 1];
 
                 if (state.flipTexture)
-                    setUV(icon, 1 - minUDiv[ix], minVDiv[iy], 1 - maxUDiv[ix], maxVDiv[iy]);
+                    setUV(icon, 1 - minUDiv[ix], 1 - maxUDiv[ix], 1 - maxVDiv[iy], 1 - minVDiv[iy]);
                 else
-                    setUV(icon, minUDiv[ix], minVDiv[iy], maxUDiv[ix], maxVDiv[iy]);
+                    setUV(icon, minUDiv[ix], maxUDiv[ix], 1 - maxVDiv[iy], 1 - minVDiv[iy]);
 
                 renderXYZUVAO(face);
 
@@ -245,7 +293,34 @@ public class ChamRenderLL
         }
     }
 
+    private void setFaceZNegUV (TextureAtlasSprite icon, double minX, double minY, double maxX, double maxY) {
+        int rotate = state.uvRotate[ChamRender.ZNEG];
+        if (rotate == ChamRenderState.ROTATE0)
+            setUV(icon, maxX + state.shiftU, minX + state.shiftU, 1 - maxY + state.shiftV, 1 - minY + state.shiftV);
+        if (rotate == ChamRenderState.ROTATE90)
+            setUV(icon, 1 - minY + state.shiftU, 1 - maxY + state.shiftU, minX + state.shiftV, maxX + state.shiftV);
+        if (rotate == ChamRenderState.ROTATE180)
+            setUV(icon, 1 - maxX + state.shiftU, 1 - minX + state.shiftU, maxY + state.shiftV, minY + state.shiftV);
+        if (rotate == ChamRenderState.ROTATE270)
+            setUV(icon, minY + state.shiftU, maxY + state.shiftU, 1 - minX + state.shiftV, 1 - maxX + state.shiftV);
+    }
+
+    private void setFaceZPosUV (TextureAtlasSprite icon, double minX, double minY, double maxX, double maxY) {
+        int rotate = state.uvRotate[ChamRender.ZPOS];
+        if (rotate == ChamRenderState.ROTATE0)
+            setUV(icon, minX + state.shiftU, maxX + state.shiftU, 1 - maxY + state.shiftV, 1 - minY + state.shiftV);
+        if (rotate == ChamRenderState.ROTATE90)
+            setUV(icon, minY + state.shiftU, maxY + state.shiftU, 1 - minX + state.shiftV, 1 - maxX + state.shiftV);
+        if (rotate == ChamRenderState.ROTATE180)
+            setUV(icon, 1 - minX + state.shiftU, 1 - maxX + state.shiftU, maxY + state.shiftV, minY + state.shiftV);
+        if (rotate == ChamRenderState.ROTATE270)
+            setUV(icon, 1 - minY + state.shiftU, 1 - maxY + state.shiftU, minX + state.shiftV, maxX + state.shiftV);
+    }
+
     private void drawFaceX (EnumFacing face, double x, double y, double z, TextureAtlasSprite icon) {
+        if (icon == null)
+            return;
+
         int rangeZ = (int)(Math.ceil(state.renderMaxZ + state.shiftU) - Math.floor(state.renderMinZ + state.shiftU));
         int rangeY = (int)(Math.ceil(state.renderMaxY + state.shiftV) - Math.floor(state.renderMinY + state.shiftV));
 
@@ -256,11 +331,17 @@ public class ChamRenderLL
         }
 
         if (rangeZ <= 1 && rangeY <= 1) {
+            double minZ = state.renderMinZ;
+            double maxZ = state.renderMaxZ;
+            if (state.flipTexture) {
+                minZ = state.renderMaxZ;
+                maxZ = state.renderMinZ;
+            }
 
-            if (state.flipTexture)
-                setUV(icon, state.renderMaxZ + state.shiftU, 1 - state.renderMaxY + state.shiftV, state.renderMinZ + state.shiftU, 1 - state.renderMinY + state.shiftV);
+            if (face == ChamRender.FACE_XNEG)
+                setFaceXNegUV(icon, minZ, state.renderMinY, maxZ, state.renderMaxY);
             else
-                setUV(icon, state.renderMinZ + state.shiftU, 1 - state.renderMaxY + state.shiftV, state.renderMaxZ + state.shiftU, 1 - state.renderMinY + state.shiftV);
+                setFaceXPosUV(icon, minZ, state.renderMinY, maxZ, state.renderMaxY);
 
             if (state.enableAO)
                 renderXYZUVAO(face);
@@ -290,9 +371,9 @@ public class ChamRenderLL
                 state.brightnessBottomRight = brightnessLerp[iz + 1][iy + 1];
 
                 if (state.flipTexture)
-                    setUV(icon, 1 - minUDiv[iz], minVDiv[iy], 1 - maxUDiv[iz], maxVDiv[iy]);
+                    setUV(icon, 1 - minUDiv[iz], 1 - maxUDiv[iz], 1 - maxVDiv[iy], 1 - minVDiv[iy]);
                 else
-                    setUV(icon, minUDiv[iz], minVDiv[iy], maxUDiv[iz], maxVDiv[iy]);
+                    setUV(icon, minUDiv[iz], maxUDiv[iz], 1 - maxVDiv[iy], 1 - minVDiv[iy]);
 
                 renderXYZUVAO(face);
 
@@ -302,9 +383,33 @@ public class ChamRenderLL
         }
     }
 
+    private void setFaceXNegUV (TextureAtlasSprite icon, double minZ, double minY, double maxZ, double maxY) {
+        int rotate = state.uvRotate[ChamRender.XNEG];
+        if (rotate == ChamRenderState.ROTATE0)
+            setUV(icon, maxZ + state.shiftU, minZ + state.shiftU, 1 - maxY + state.shiftV, 1 - minY + state.shiftV);
+        if (rotate == ChamRenderState.ROTATE90)
+            setUV(icon, minY + state.shiftU, maxY + state.shiftU, 1 - maxZ + state.shiftV, 1 - minZ + state.shiftV);
+        if (rotate == ChamRenderState.ROTATE180)
+            setUV(icon, 1 - maxZ + state.shiftU, 1 - minZ + state.shiftU, maxY + state.shiftV, minY + state.shiftV);
+        if (rotate == ChamRenderState.ROTATE270)
+            setUV(icon, 1 - minY + state.shiftU, 1 - maxY + state.shiftU, maxZ + state.shiftV, minZ + state.shiftV);
+    }
+
+    private void setFaceXPosUV (TextureAtlasSprite icon, double minZ, double minY, double maxZ, double maxY) {
+        int rotate = state.uvRotate[ChamRender.XPOS];
+        if (rotate == ChamRenderState.ROTATE0)
+            setUV(icon, minZ + state.shiftU, maxZ + state.shiftU, 1 - minY + state.shiftV, 1 - maxY + state.shiftV);
+        if (rotate == ChamRenderState.ROTATE90)
+            setUV(icon, 1 - maxY + state.shiftU, 1 - minY + state.shiftU, maxZ + state.shiftV, minZ + state.shiftV);
+        if (rotate == ChamRenderState.ROTATE180)
+            setUV(icon, 1 - minZ + state.shiftU, 1 - maxZ + state.shiftU, minY + state.shiftV, maxY + state.shiftV);
+        if (rotate == ChamRenderState.ROTATE270)
+            setUV(icon, maxY + state.shiftU, minY + state.shiftU, 1 - maxZ + state.shiftV, 1 - minZ + state.shiftV);
+    }
+
     public void drawPartialFace (EnumFacing face, double x, double y, double z, TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax) {
         setXYZ(x, y, z);
-        setUV(icon, uMin, vMin, uMax, vMax);
+        setUV(icon, uMin, uMax, vMin, vMax);
 
         if (state.enableAO)
             renderXYZUVAO(face);
@@ -348,7 +453,7 @@ public class ChamRenderLL
         double diffLR = right - left;
         double diffTB = bottom - top;
 
-        double posLR = left;
+        double posLR = 0;
 
         for (int lr = 0; lr <= rangeLR; lr++) {
             float lerpLR = (float)(posLR / diffLR);
@@ -356,7 +461,7 @@ public class ChamRenderLL
             int brightTop = ChamRenderAO.mixAOBrightness(state.brightnessTopLeft, state.brightnessTopRight, 1 - lerpLR, lerpLR);
             int brightBottom = ChamRenderAO.mixAOBrightness(state.brightnessBottomLeft, state.brightnessBottomRight, 1 - lerpLR, lerpLR);
 
-            double posTB = top;
+            double posTB = 0;
             for (int tb = 0; tb <= rangeTB; tb++) {
                 float lerpTB = (float)(posTB / diffTB);
 
@@ -371,14 +476,14 @@ public class ChamRenderLL
         }
     }
 
-    private void setUV (TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax) {
+    private void setUV (TextureAtlasSprite icon, double uMin, double uMax, double vMin, double vMax) {
         uv[0] = icon.getInterpolatedU(uMin * 16);
         uv[1] = icon.getInterpolatedU(uMax * 16);
         uv[2] = icon.getInterpolatedV(vMin * 16);
         uv[3] = icon.getInterpolatedV(vMax * 16);
     }
 
-    private void setUV (double uMin, double vMin, double uMax, double vMax) {
+    private void setUV (double uMin, double uMax, double vMin, double vMax) {
         uv[0] = uMin;
         uv[1] = uMax;
         uv[2] = vMin;
@@ -386,12 +491,12 @@ public class ChamRenderLL
     }
 
     private void setXYZ (double x, double y, double z) {
-        xyz[0] = x + state.renderMinX;
-        xyz[1] = x + state.renderMaxX;
-        xyz[2] = y + state.renderMinY;
-        xyz[3] = y + state.renderMaxY;
-        xyz[4] = z + state.renderMinZ;
-        xyz[5] = z + state.renderMaxZ;
+        xyz[0] = x + state.renderOffsetX + state.renderMinX;
+        xyz[1] = x + state.renderOffsetX + state.renderMaxX;
+        xyz[2] = y + state.renderOffsetY + state.renderMinY;
+        xyz[3] = y + state.renderOffsetY + state.renderMaxY;
+        xyz[4] = z + state.renderOffsetZ + state.renderMinZ;
+        xyz[5] = z + state.renderOffsetZ + state.renderMaxZ;
     }
 
     private void renderXYZUV (EnumFacing facing) {
@@ -404,10 +509,29 @@ public class ChamRenderLL
         }
 
         int[][] index = xyzuvMap[facing.getIndex()];
-        setBlockVertex(index[TL], state.color, state.brightness);
-        setBlockVertex(index[BL], state.color, state.brightness);
-        setBlockVertex(index[BR], state.color, state.brightness);
-        setBlockVertex(index[TR], state.color, state.brightness);
+        int uvRotate = state.uvRotate[facing.getIndex()];
+
+        int[] mapTL = index[TL];
+        int[] mapBL = index[BL];
+        int[] mapBR = index[BR];
+        int[] mapTR = index[TR];
+
+        double ubl = uv[mapBL[3]];
+        double vbl = uv[mapBL[4]];
+        double utr = uv[mapTR[3]];
+        double vtr = uv[mapTR[4]];
+
+        if (uvRotate == ChamRenderState.ROTATE90 || uvRotate == ChamRenderState.ROTATE270) {
+            ubl = uv[mapTR[3]];
+            vbl = uv[mapTR[4]];
+            utr = uv[mapBL[3]];
+            vtr = uv[mapBL[4]];
+        }
+
+        setBlockVertex(index[TL], uv[mapTL[3]], uv[mapTL[4]], state.color, state.brightness);
+        setBlockVertex(index[BL], ubl, vbl, state.color, state.brightness);
+        setBlockVertex(index[BR], uv[mapBR[3]], uv[mapBR[4]], state.color, state.brightness);
+        setBlockVertex(index[TR], utr, vtr, state.color, state.brightness);
     }
 
     private void renderXYZUVAO (EnumFacing facing) {
@@ -421,19 +545,38 @@ public class ChamRenderLL
         }
 
         int[][] index = xyzuvMap[facing.getIndex()];
-        setBlockVertex(index[TL], state.colorTopLeft, state.brightnessTopLeft);
-        setBlockVertex(index[BL], state.colorBottomLeft, state.brightnessBottomLeft);
-        setBlockVertex(index[BR], state.colorBottomRight, state.brightnessBottomRight);
-        setBlockVertex(index[TR], state.colorTopRight, state.brightnessTopRight);
+        int uvRotate = state.uvRotate[facing.getIndex()];
+
+        int[] mapTL = index[TL];
+        int[] mapBL = index[BL];
+        int[] mapBR = index[BR];
+        int[] mapTR = index[TR];
+
+        double ubl = uv[mapBL[3]];
+        double vbl = uv[mapBL[4]];
+        double utr = uv[mapTR[3]];
+        double vtr = uv[mapTR[4]];
+
+        if (uvRotate == ChamRenderState.ROTATE90 || uvRotate == ChamRenderState.ROTATE270) {
+            ubl = uv[mapTR[3]];
+            vbl = uv[mapTR[4]];
+            utr = uv[mapBL[3]];
+            vtr = uv[mapBL[4]];
+        }
+
+        setBlockVertex(index[TL], uv[mapTL[3]], uv[mapTL[4]], state.colorTopLeft, state.brightnessTopLeft);
+        setBlockVertex(index[BL], ubl, vbl, state.colorBottomLeft, state.brightnessBottomLeft);
+        setBlockVertex(index[BR], uv[mapBR[3]], uv[mapBR[4]], state.colorBottomRight, state.brightnessBottomRight);
+        setBlockVertex(index[TR], utr, vtr, state.colorTopRight, state.brightnessTopRight);
     }
 
-    private void setBlockVertex (int[] xumap, float[] color, int brightness) {
+    private void setBlockVertex (int[] xumap, double u, double v, float[] color, int brightness) {
         WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
 
         if (tessellator.getVertexFormat().hasNormal()) {
             tessellator.pos(xyz[xumap[0]], xyz[xumap[1]], xyz[xumap[2]])
                 .color(color[0], color[1], color[2], 1)
-                .tex(uv[xumap[3]], uv[xumap[4]])
+                .tex(u, v)
                 .normal(state.normal[0], state.normal[1], state.normal[2])
                 .endVertex();
         }
@@ -442,7 +585,7 @@ public class ChamRenderLL
             int lblk = (brightness & 255);
 
             tessellator.pos(xyz[xumap[0]], xyz[xumap[1]], xyz[xumap[2]])
-                .tex(uv[xumap[3]], uv[xumap[4]])
+                .tex(u, v)
                 .lightmap(lsky, lblk)
                 .color(color[0], color[1], color[2], 1)
                 .endVertex();
@@ -451,10 +594,24 @@ public class ChamRenderLL
 
     private BakedQuad bakeXYZUVBlock (EnumFacing facing, float[] colorTL, float[] colorBL, float[] colorBR, float[] colorTR) {
         int[][] index = xyzuvMap[facing.getIndex()];
+        int uvRotate = state.uvRotate[facing.getIndex()];
+
         int[] mapTL = index[TL];
         int[] mapBL = index[BL];
         int[] mapBR = index[BR];
         int[] mapTR = index[TR];
+
+        double ubl = uv[mapBL[3]];
+        double vbl = uv[mapBL[4]];
+        double utr = uv[mapTR[3]];
+        double vtr = uv[mapTR[4]];
+
+        if (uvRotate == ChamRenderState.ROTATE90 || uvRotate == ChamRenderState.ROTATE270) {
+            ubl = uv[mapTR[3]];
+            vbl = uv[mapTR[4]];
+            utr = uv[mapBL[3]];
+            vtr = uv[mapBL[4]];
+        }
 
         int light = 0xFFFFFFFF;
 
@@ -471,8 +628,8 @@ public class ChamRenderLL
             Float.floatToRawIntBits((float)xyz[mapBL[1]]),
             Float.floatToRawIntBits((float)xyz[mapBL[2]]),
             packColor(colorBL),
-            Float.floatToRawIntBits((float)uv[mapBL[3]]),
-            Float.floatToRawIntBits((float)uv[mapBL[4]]),
+            Float.floatToRawIntBits((float)ubl),
+            Float.floatToRawIntBits((float)vbl),
             light,
 
             Float.floatToRawIntBits((float)xyz[mapBR[0]]),
@@ -487,18 +644,32 @@ public class ChamRenderLL
             Float.floatToRawIntBits((float)xyz[mapTR[1]]),
             Float.floatToRawIntBits((float)xyz[mapTR[2]]),
             packColor(colorTR),
-            Float.floatToRawIntBits((float)uv[mapTR[3]]),
-            Float.floatToRawIntBits((float)uv[mapTR[4]]),
+            Float.floatToRawIntBits((float)utr),
+            Float.floatToRawIntBits((float)vtr),
             light
         }, -1, facing);
     }
 
     private BakedQuad bakeXYZUVItem (EnumFacing facing, float[] colorTL, float[] colorBL, float[] colorBR, float[] colorTR) {
         int[][] index = xyzuvMap[facing.getIndex()];
+        int uvRotate = state.uvRotate[facing.getIndex()];
+
         int[] mapTL = index[TL];
         int[] mapBL = index[BL];
         int[] mapBR = index[BR];
         int[] mapTR = index[TR];
+
+        double ubl = uv[mapBL[3]];
+        double vbl = uv[mapBL[4]];
+        double utr = uv[mapTR[3]];
+        double vtr = uv[mapTR[4]];
+
+        if (uvRotate == ChamRenderState.ROTATE90 || uvRotate == ChamRenderState.ROTATE270) {
+            ubl = uv[mapTR[3]];
+            vbl = uv[mapTR[4]];
+            utr = uv[mapBL[3]];
+            vtr = uv[mapBL[4]];
+        }
 
         return new BakedQuad(new int[] {
             Float.floatToRawIntBits((float)xyz[mapTL[0]]),
@@ -513,8 +684,8 @@ public class ChamRenderLL
             Float.floatToRawIntBits((float)xyz[mapBL[1]]),
             Float.floatToRawIntBits((float)xyz[mapBL[2]]),
             packColor(colorBL),
-            Float.floatToRawIntBits((float)uv[mapBL[3]]),
-            Float.floatToRawIntBits((float)uv[mapBL[4]]),
+            Float.floatToRawIntBits((float)ubl),
+            Float.floatToRawIntBits((float)vbl),
             packNormal(state.normal),
 
             Float.floatToRawIntBits((float)xyz[mapBR[0]]),
@@ -529,8 +700,8 @@ public class ChamRenderLL
             Float.floatToRawIntBits((float)xyz[mapTR[1]]),
             Float.floatToRawIntBits((float)xyz[mapTR[2]]),
             packColor(colorTR),
-            Float.floatToRawIntBits((float)uv[mapTR[3]]),
-            Float.floatToRawIntBits((float)uv[mapTR[4]]),
+            Float.floatToRawIntBits((float)utr),
+            Float.floatToRawIntBits((float)vtr),
             packNormal(state.normal)
         }, -1, facing);
     }
