@@ -103,6 +103,10 @@ public class ChamRenderLL
         return result;
     }
 
+    public boolean isBaking () {
+        return isBaking;
+    }
+
     public VertexFormat getVertexFormat () {
         return bakedFormat;
     }

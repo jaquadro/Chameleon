@@ -99,6 +99,10 @@ public class ChamRender
         state.setRenderBounds(xMin, yMin, zMin, xMax, yMax, zMax);
     }
 
+    public void setRenderBounds (double[] bound) {
+        state.setRenderBounds(bound[0], bound[1], bound[2], bound[3], bound[4], bound[5]);
+    }
+
     public void setRenderBounds (Block block) {
         setRenderBounds(block.getBlockBoundsMinX(), block.getBlockBoundsMinY(), block.getBlockBoundsMinZ(), block.getBlockBoundsMaxX(), block.getBlockBoundsMaxY(), block.getBlockBoundsMaxZ());
     }
@@ -158,7 +162,7 @@ public class ChamRender
         face = EnumFacing.getFront(ChamRenderState.FACE_BY_FACE_ROTATION[face.getIndex()][state.rotateTransform]);
         llHelper.drawFace(face, pos.getX(), pos.getY(), pos.getZ(), icon);
 
-        if (blockAccess == null)
+        if (blockAccess == null && !llHelper.isBaking())
             Tessellator.getInstance().draw();
     }
 
@@ -168,7 +172,8 @@ public class ChamRender
     }
 
     public void bakeFace (EnumFacing face, IBlockState blockState, TextureAtlasSprite icon, float r, float g, float b) {
-        state.setColor(r, g, b);
+        float scale = state.getColorMult(face);
+        state.setColor(r * scale, g * scale, b * scale);
         state.setNormal(normMap[face.getIndex()]);
 
         face = EnumFacing.getFront(ChamRenderState.FACE_BY_FACE_ROTATION[face.getIndex()][state.rotateTransform]);
@@ -222,14 +227,15 @@ public class ChamRender
         setupColorMult(face, r, g, b);
         renderPartialFace(face, icon, uMin, vMin, uMax, vMax);
 
-        Tessellator.getInstance().draw();
+        if (!llHelper.isBaking())
+            Tessellator.getInstance().draw();
     }
 
     public void renderPartialFaceColorMult (EnumFacing face, IBlockAccess blockAccess, IBlockState blockState, BlockPos pos, TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax, float r, float g, float b) {
         setupColorMult(face, blockAccess, blockState, pos, r, g, b);
         renderPartialFace(face, pos.getX(), pos.getY(), pos.getZ(), icon, uMin, vMin, uMax, vMax);
 
-        if (blockAccess == null)
+        if (blockAccess == null && !llHelper.isBaking())
             Tessellator.getInstance().draw();
     }
 
@@ -239,7 +245,8 @@ public class ChamRender
     }
 
     public void bakePartialFace (EnumFacing face, IBlockState blockState, TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax, float r, float g, float b) {
-        state.setColor(r, g, b);
+        float scale = state.getColorMult(face);
+        state.setColor(r * scale, g * scale, b * scale);
         state.setNormal(normMap[face.getIndex()]);
 
         face = EnumFacing.getFront(ChamRenderState.FACE_BY_FACE_ROTATION[face.getIndex()][state.rotateTransform]);
@@ -456,7 +463,9 @@ public class ChamRender
 
         state.setColor(scale * r, scale * g, scale * b);
         state.setNormal(norm);
-        tessellator.begin(GL11.GL_QUADS, DefaultVertexFormats.ITEM);
+
+        if (!llHelper.isBaking())
+            tessellator.begin(GL11.GL_QUADS, DefaultVertexFormats.ITEM);
 
         state.enableAO = false;
     }
@@ -470,9 +479,10 @@ public class ChamRender
         float scale = state.getColorMult(face);
 
         if (blockAccess == null) {
-            tessellator.begin(GL11.GL_QUADS, DefaultVertexFormats.ITEM);
-            state.setColor(r, g, b);
+            state.setColor(r * scale, g * scale, b * scale);
             state.setNormal(norm);
+            if (!llHelper.isBaking())
+                tessellator.begin(GL11.GL_QUADS, DefaultVertexFormats.ITEM);
         }
         else {
             int brightX = pos.getX();
