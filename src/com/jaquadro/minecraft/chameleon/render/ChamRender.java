@@ -90,9 +90,9 @@ public class ChamRender
         return tessellator;
     }
 
-    public void renderEmptyPlane (int x, int y, int z) {
+    public void renderEmptyPlane (BlockPos pos) {
         state.setRenderBounds(0, 0, 0, 0, 0, 0);
-        llHelper.drawFace(ChamRender.FACE_YNEG, x, y, z, getDefaultSprite());
+        llHelper.drawFace(ChamRender.FACE_YNEG, pos.getX(), pos.getY(), pos.getZ(), getDefaultSprite());
     }
 
     public void setRenderBounds (double xMin, double yMin, double zMin, double xMax, double yMax, double zMax) {
@@ -479,8 +479,9 @@ public class ChamRender
         float scale = state.getColorMult(face);
 
         if (blockAccess == null) {
-            state.setColor(r * scale, g * scale, b * scale);
-            state.setNormal(norm);
+                state.setColor(r * scale, g * scale, b * scale);
+                state.setNormal(norm);
+
             if (!llHelper.isBaking())
                 tessellator.begin(GL11.GL_QUADS, DefaultVertexFormats.ITEM);
         }
