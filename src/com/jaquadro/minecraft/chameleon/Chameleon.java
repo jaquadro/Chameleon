@@ -2,6 +2,7 @@ package com.jaquadro.minecraft.chameleon;
 
 import com.jaquadro.minecraft.chameleon.core.CommonProxy;
 import com.jaquadro.minecraft.chameleon.resources.IconRegistry;
+import com.jaquadro.minecraft.chameleon.resources.ModelRegistry;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -20,6 +21,9 @@ public class Chameleon
 
     @SideOnly(Side.CLIENT)
     public IconRegistry iconRegistry;
+
+    @SideOnly(Side.CLIENT)
+    public ModelRegistry modelRegistry;
 
     @Mod.Instance(MOD_ID)
     public static Chameleon instance;
