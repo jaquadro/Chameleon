@@ -1,10 +1,19 @@
 package com.jaquadro.minecraft.chameleon.resources;
 
 import com.jaquadro.minecraft.chameleon.Chameleon;
+import com.jaquadro.minecraft.chameleon.resources.register.IBlockModelRegister;
+import com.jaquadro.minecraft.chameleon.resources.register.IItemModelRegister;
+import com.jaquadro.minecraft.chameleon.resources.register.ITextureRegister;
+import com.jaquadro.minecraft.chameleon.resources.register.IUnifiedRegister;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ItemMeshDefinition;
+import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.IRegistry;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.GameData;
@@ -19,19 +28,46 @@ import java.util.Set;
 @SideOnly(Side.CLIENT)
 public class ModelRegistry
 {
-    private final Set<IModelRegister> registry = new HashSet<IModelRegister>();
+    private final Set<IBlockModelRegister> blockRegistry = new HashSet<IBlockModelRegister>();
+    private final Set<IItemModelRegister> itemRegistry = new HashSet<IItemModelRegister>();
 
-    public void registerModel (IModelRegister modelRegister) {
+    public void registerModel (IBlockModelRegister modelRegister) {
+        if (modelRegister != null)
+            blockRegistry.add(modelRegister);
+    }
+
+    public void registerModel (IItemModelRegister modelRegister) {
+        if (modelRegister != null)
+            itemRegistry.add(modelRegister);
+    }
+
+    public void registerModel (IUnifiedRegister modelRegister) {
         if (modelRegister != null) {
-            if (registry.add(modelRegister))
-                registerTextureResources(modelRegister.getTextureResources());
+            blockRegistry.add(modelRegister);
+            itemRegistry.add(modelRegister);
+
+            registerTextureResources(modelRegister.getTextureResources());
         }
     }
 
     public void loadModels (IRegistry<ModelResourceLocation, IBakedModel> modelIRegistry) {
-        for (IModelRegister register : registry) {
+        for (IBlockModelRegister register : blockRegistry) {
             for (IBlockState state : register.getBlockStates())
                 modelIRegistry.putObject(getResourceLocation(state), register.getModel(state));
+        }
+
+        for (IItemModelRegister register : itemRegistry) {
+            Item item = register.getItem();
+            for (ItemStack stack : register.getItemVariants())
+                modelIRegistry.putObject(getResourceLocation(stack), register.getModel(stack));
+
+            RenderItem renderItem = Minecraft.getMinecraft().getRenderItem();
+            if (item instanceof IItemMeshResolver)
+                renderItem.getItemModelMesher().register(item, ((IItemMeshResolver) item).getMeshResolver());
+            else {
+                for (ItemStack stack : register.getItemVariants())
+                    renderItem.getItemModelMesher().register(item, stack.getMetadata(), getResourceLocation(stack));
+            }
         }
     }
 
@@ -52,4 +88,24 @@ public class ModelRegistry
         return new ModelResourceLocation(loc, builder.toString());
     }
 
+    private static ModelResourceLocation getResourceLocation (ItemStack stack) {
+        Item item = stack.getItem();
+
+        if (item instanceof ItemMeshDefinition)
+            return ((ItemMeshDefinition) item).getModelLocation(stack);
+
+        if (item instanceof IItemMeshResolver) {
+            ItemMeshDefinition resolver = ((IItemMeshResolver) item).getMeshResolver();
+            if (resolver != null)
+                return resolver.getModelLocation(stack);
+        }
+
+        if (item instanceof IItemMeshProvider) {
+            ItemMeshDefinition resolver = ((IItemMeshProvider) item).getMeshResolver();
+            if (resolver != null)
+                return resolver.getModelLocation(stack);
+        }
+
+        return new ModelResourceLocation(GameData.getItemRegistry().getNameForObject(item).toString(), "inventory");
+    }
 }
