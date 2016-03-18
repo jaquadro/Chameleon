@@ -22,6 +22,6 @@ public class ClientProxy extends CommonProxy
 
     @SubscribeEvent
     public void onModelBakeEvent (ModelBakeEvent event) {
-        Chameleon.instance.modelRegistry.loadModels(event.modelRegistry);
+        Chameleon.instance.modelRegistry.loadModels(event.getModelRegistry());
     }
 }

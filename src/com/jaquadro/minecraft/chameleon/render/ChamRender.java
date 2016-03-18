@@ -5,14 +5,15 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import org.lwjgl.opengl.GL11;
 
@@ -36,6 +37,8 @@ public class ChamRender
 
     public static final int FULL_BRIGHTNESS = 15728880;
 
+    public static final float[] COLOR_WHITE = new float[] { 1, 1, 1 };
+
     private static final float normMap[][] = {
         { 0, -1, 0 },
         { 0, 1, 0 },
@@ -45,7 +48,7 @@ public class ChamRender
         { 1, 0, 0 },
     };
 
-    private WorldRenderer tessellator;
+    private VertexBuffer tessellator;
 
     public ChamRenderState state = new ChamRenderState();
 
@@ -82,11 +85,11 @@ public class ChamRender
         target[2] = source[2] * scale;
     }
 
-    void setWorldRenderer (WorldRenderer worldRenderer) {
-        tessellator = worldRenderer;
+    void setVertexBuffer (VertexBuffer buffer) {
+        tessellator = buffer;
     }
 
-    WorldRenderer getWorldRenderer () {
+    VertexBuffer getVertexBuffer () {
         return tessellator;
     }
 
@@ -103,8 +106,9 @@ public class ChamRender
         state.setRenderBounds(bound[0], bound[1], bound[2], bound[3], bound[4], bound[5]);
     }
 
-    public void setRenderBounds (Block block) {
-        setRenderBounds(block.getBlockBoundsMinX(), block.getBlockBoundsMinY(), block.getBlockBoundsMinZ(), block.getBlockBoundsMaxX(), block.getBlockBoundsMaxY(), block.getBlockBoundsMaxZ());
+    public void setRenderBounds (IBlockAccess blockAccess, IBlockState blockState, BlockPos pos) {
+        AxisAlignedBB bound = blockState.getBlock().getBoundingBox(blockState, blockAccess, pos);
+        setRenderBounds(bound.minX, bound.minY, bound.minZ, bound.maxX, bound.maxY, bound.maxZ);
     }
 
     /*public void renderBlock (IBlockAccess blockAccess, Block block, int meta) {
@@ -136,8 +140,8 @@ public class ChamRender
     }*/
 
     public void renderFace (EnumFacing face, IBlockAccess blockAccess, IBlockState blockState, TextureAtlasSprite icon) {
-        calculateBaseColor(colorScratch, blockState.getBlock().getRenderColor(blockState));
-        renderFaceColorMult(face, blockAccess, blockState, BlockPos.ORIGIN, icon, colorScratch[0], colorScratch[1], colorScratch[2]);
+        //calculateBaseColor(colorScratch, blockState.getBlock().getRenderColor(blockState));
+        renderFaceColorMult(face, blockAccess, blockState, BlockPos.ORIGIN, icon, 1, 1, 1);
     }
 
     public void renderFace (EnumFacing face, IBlockAccess blockAccess, IBlockState blockState, TextureAtlasSprite icon, float r, float g, float b) {
@@ -145,12 +149,12 @@ public class ChamRender
     }
 
     public void renderFace (EnumFacing face, IBlockAccess blockAccess, IBlockState blockState, BlockPos pos, TextureAtlasSprite icon) {
-        calculateBaseColor(colorScratch, blockState.getBlock().colorMultiplier(blockAccess, pos));
-        renderFace(face, blockAccess, blockState, pos, icon, colorScratch[0], colorScratch[1], colorScratch[2]);
+        //calculateBaseColor(colorScratch, blockState.getBlock().colorMultiplier(blockAccess, pos));
+        renderFace(face, blockAccess, blockState, pos, icon, 1, 1, 1);
     }
 
     public void renderFace (EnumFacing face, IBlockAccess blockAccess, IBlockState blockState, BlockPos pos, TextureAtlasSprite icon, float r, float g, float b) {
-        if (Minecraft.isAmbientOcclusionEnabled() && blockAccess != null && blockState.getBlock().getLightValue(blockAccess, pos) == 0)
+        if (Minecraft.isAmbientOcclusionEnabled() && blockAccess != null && blockState.getBlock().getLightValue(blockState, blockAccess, pos) == 0)
             renderFaceAOPartial(face, blockAccess, blockState, pos, icon, r, g, b);
         else
             renderFaceColorMult(face, blockAccess, blockState, pos, icon, r, g, b);
@@ -167,8 +171,8 @@ public class ChamRender
     }
 
     public void bakeFace (EnumFacing face, IBlockState blockState, TextureAtlasSprite icon) {
-        calculateBaseColor(colorScratch, blockState.getBlock().getRenderColor(blockState));
-        bakeFace(face, blockState, icon, colorScratch[0], colorScratch[1], colorScratch[2]);
+        //calculateBaseColor(colorScratch, blockState.getBlock().getRenderColor(blockState));
+        bakeFace(face, blockState, icon, 1, 1, 1);
     }
 
     public void bakeFace (EnumFacing face, IBlockState blockState, TextureAtlasSprite icon, float r, float g, float b) {
@@ -187,22 +191,22 @@ public class ChamRender
 
         switch (face.getIndex()) {
             case YNEG:
-                aoHelper.setupYNegAOPartial(blockAccess, blockState.getBlock(), pos, r, g, b);
+                aoHelper.setupYNegAOPartial(blockAccess, blockState, pos, r, g, b);
                 break;
             case YPOS:
-                aoHelper.setupYPosAOPartial(blockAccess, blockState.getBlock(), pos, r, g, b);
+                aoHelper.setupYPosAOPartial(blockAccess, blockState, pos, r, g, b);
                 break;
             case ZNEG:
-                aoHelper.setupZNegAOPartial(blockAccess, blockState.getBlock(), pos, r, g, b);
+                aoHelper.setupZNegAOPartial(blockAccess, blockState, pos, r, g, b);
                 break;
             case ZPOS:
-                aoHelper.setupZPosAOPartial(blockAccess, blockState.getBlock(), pos, r, g, b);
+                aoHelper.setupZPosAOPartial(blockAccess, blockState, pos, r, g, b);
                 break;
             case XNEG:
-                aoHelper.setupXNegAOPartial(blockAccess, blockState.getBlock(), pos, r, g, b);
+                aoHelper.setupXNegAOPartial(blockAccess, blockState, pos, r, g, b);
                 break;
             case XPOS:
-                aoHelper.setupXPosAOPartial(blockAccess, blockState.getBlock(), pos, r, g, b);
+                aoHelper.setupXPosAOPartial(blockAccess, blockState, pos, r, g, b);
                 break;
         }
 
@@ -212,12 +216,12 @@ public class ChamRender
     }
 
     public void renderPartialFace (EnumFacing face, IBlockAccess blockAccess, IBlockState blockState, BlockPos pos, TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax) {
-        calculateBaseColor(colorScratch, blockState.getBlock().colorMultiplier(blockAccess, pos));
-        renderPartialFace(face, blockAccess, blockState, pos, icon, uMin, vMin, uMax, vMax, colorScratch[0], colorScratch[1], colorScratch[2]);
+        //calculateBaseColor(colorScratch, blockState.getBlock().colorMultiplier(blockAccess, pos));
+        renderPartialFace(face, blockAccess, blockState, pos, icon, uMin, vMin, uMax, vMax, 1, 1, 1);
     }
 
     public void renderPartialFace (EnumFacing face, IBlockAccess blockAccess, IBlockState blockState, BlockPos pos, TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax, float r, float g, float b) {
-        if (Minecraft.isAmbientOcclusionEnabled() && blockAccess != null && blockState.getBlock().getLightValue(blockAccess, pos) == 0)
+        if (Minecraft.isAmbientOcclusionEnabled() && blockAccess != null && blockState.getBlock().getLightValue(blockState, blockAccess, pos) == 0)
             renderPartialFaceAOPartial(face, blockAccess, blockState, pos, icon, uMin, vMin, uMax, vMax, r, g, b);
         else
             renderPartialFaceColorMult(face, blockAccess, blockState, pos, icon, uMin, vMin, uMax, vMax, r, g, b);
@@ -240,8 +244,8 @@ public class ChamRender
     }
 
     public void bakePartialFace (EnumFacing face, IBlockState blockState, TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax) {
-        calculateBaseColor(colorScratch, blockState.getBlock().getRenderColor(blockState));
-        bakePartialFace(face, blockState, icon, uMin, vMin, uMax, vMax, colorScratch[0], colorScratch[1], colorScratch[2]);
+        //calculateBaseColor(colorScratch, blockState.getBlock().getRenderColor(blockState));
+        bakePartialFace(face, blockState, icon, uMin, vMin, uMax, vMax, 1, 1, 1);
     }
 
     public void bakePartialFace (EnumFacing face, IBlockState blockState, TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax, float r, float g, float b) {
@@ -258,22 +262,22 @@ public class ChamRender
 
         switch (ChamRenderState.FACE_BY_FACE_ROTATION[face.getIndex()][state.rotateTransform]) {
             case YNEG:
-                aoHelper.setupYNegAOPartial(blockAccess, blockState.getBlock(), pos, r, g, b);
+                aoHelper.setupYNegAOPartial(blockAccess, blockState, pos, r, g, b);
                 break;
             case YPOS:
-                aoHelper.setupYPosAOPartial(blockAccess, blockState.getBlock(), pos, r, g, b);
+                aoHelper.setupYPosAOPartial(blockAccess, blockState, pos, r, g, b);
                 break;
             case ZNEG:
-                aoHelper.setupZNegAOPartial(blockAccess, blockState.getBlock(), pos, r, g, b);
+                aoHelper.setupZNegAOPartial(blockAccess, blockState, pos, r, g, b);
                 break;
             case ZPOS:
-                aoHelper.setupZPosAOPartial(blockAccess, blockState.getBlock(), pos, r, g, b);
+                aoHelper.setupZPosAOPartial(blockAccess, blockState, pos, r, g, b);
                 break;
             case XNEG:
-                aoHelper.setupXNegAOPartial(blockAccess, blockState.getBlock(), pos, r, g, b);
+                aoHelper.setupXNegAOPartial(blockAccess, blockState, pos, r, g, b);
                 break;
             case XPOS:
-                aoHelper.setupXPosAOPartial(blockAccess, blockState.getBlock(), pos, r, g, b);
+                aoHelper.setupXPosAOPartial(blockAccess, blockState, pos, r, g, b);
                 break;
         }
 
@@ -302,8 +306,8 @@ public class ChamRender
 
         state.setBrightness(FULL_BRIGHTNESS);
 
-        calculateBaseColor(colorScratch, blockState.getBlock().getRenderColor(blockState));
-        state.setColor(colorScratch);
+        //calculateBaseColor(colorScratch, blockState.getBlock().getRenderColor(blockState));
+        state.setColor(COLOR_WHITE);
 
         boolean lighting = GL11.glIsEnabled(GL11.GL_LIGHTING);
         GL11.glDisable(GL11.GL_LIGHTING);
@@ -328,10 +332,10 @@ public class ChamRender
 
         Block block = blockState.getBlock();
 
-        state.setBrightness(block.getMixedBrightnessForBlock(blockAccess, pos));
+        state.setBrightness(block.getPackedLightmapCoords(blockState, blockAccess, pos));
 
-        calculateBaseColor(colorScratch, block.colorMultiplier(blockAccess, pos));
-        state.setColor(colorScratch);
+        //calculateBaseColor(colorScratch, block.colorMultiplier(blockAccess, pos));
+        state.setColor(COLOR_WHITE);
 
         drawCrossedSquares(icon, pos.getX(), pos.getY(), pos.getZ(), 1.0F);
     }
@@ -457,7 +461,7 @@ public class ChamRender
         //if (tessellator == null)
         //    return;
 
-        WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
+        VertexBuffer tessellator = Tessellator.getInstance().getBuffer();
         float[] norm = normMap[face.getIndex()];
         float scale = state.getColorMult(face);
 
@@ -474,7 +478,7 @@ public class ChamRender
         //if (tessellator == null)
         //    return;
 
-        WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
+        VertexBuffer tessellator = Tessellator.getInstance().getBuffer();
         float[] norm = normMap[face.getIndex()];
         float scale = state.getColorMult(face);
 
@@ -503,7 +507,7 @@ public class ChamRender
                 pos = new BlockPos(brightX, brightY, brightZ);
 
             state.setColor(scale * r, scale * g, scale * b);
-            state.setBrightness(blockState.getBlock().getMixedBrightnessForBlock(blockAccess, pos));
+            state.setBrightness(blockState.getBlock().getPackedLightmapCoords(blockState, blockAccess, pos));
         }
 
         state.enableAO = false;

@@ -1,20 +1,14 @@
 package com.jaquadro.minecraft.chameleon.model;
 
+import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraftforge.client.model.IFlexibleBakedModel;
+import net.minecraft.client.renderer.block.model.ItemOverrideList;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public abstract class BlockModel implements IFlexibleBakedModel
+public abstract class BlockModel implements IBakedModel
 {
-    @Override
-    public VertexFormat getFormat () {
-        return DefaultVertexFormats.ITEM;
-    }
-
     @Override
     public boolean isAmbientOcclusion () {
         return true;
@@ -33,5 +27,10 @@ public abstract class BlockModel implements IFlexibleBakedModel
     @Override
     public ItemCameraTransforms getItemCameraTransforms () {
         return ItemCameraTransforms.DEFAULT;
+    }
+
+    @Override
+    public ItemOverrideList getOverrides () {
+        return ItemOverrideList.NONE;
     }
 }

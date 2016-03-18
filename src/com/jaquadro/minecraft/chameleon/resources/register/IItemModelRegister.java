@@ -1,6 +1,6 @@
 package com.jaquadro.minecraft.chameleon.resources.register;
 
-import net.minecraft.client.resources.model.IBakedModel;
+import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 

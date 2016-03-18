@@ -1,13 +1,13 @@
 package com.jaquadro.minecraft.chameleon.render;
 
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.MathHelper;
 
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -79,6 +79,7 @@ public class ChamRenderLL
     private boolean isBaking;
     private VertexFormat bakedFormat;
     private int bakedTintIndex = -1;
+    private boolean diffuseLight = false;
     private List<BakedQuad> quadBuffer;
 
     public ChamRenderLL (ChamRenderState state) {
@@ -86,14 +87,19 @@ public class ChamRenderLL
     }
 
     public void startBaking (VertexFormat format) {
-        startBaking(format, -1);
+        startBaking(format, -1, false);
     }
 
     public void startBaking (VertexFormat format, int tintIndex) {
+        startBaking(format, tintIndex, false);
+    }
+
+    public void startBaking (VertexFormat format, int tintIndex, boolean applyDiffuseLight) {
         isBaking = true;
         quadBuffer = new ArrayList<BakedQuad>();
         bakedFormat = format;
         bakedTintIndex = tintIndex;
+        diffuseLight = applyDiffuseLight;
     }
 
     public List<BakedQuad> stopBaking () {
@@ -158,9 +164,9 @@ public class ChamRenderLL
                 setFaceYPosUV(icon, state.renderMinX, state.renderMinZ, state.renderMaxX, state.renderMaxZ);
 
             if (state.enableAO)
-                renderXYZUVAO(face);
+                renderXYZUVAO(face, icon);
             else
-                renderXYZUV(face);
+                renderXYZUV(face, icon);
             return;
         }
 
@@ -199,7 +205,7 @@ public class ChamRenderLL
                         break;
                 }
 
-                renderXYZUVAO(face);
+                renderXYZUVAO(face, icon);
 
                 xyz[MINZ] = xyz[MAXZ];
             }
@@ -258,9 +264,9 @@ public class ChamRenderLL
                 setFaceZPosUV(icon, minX, state.renderMinY, maxX, state.renderMaxY);
 
             if (state.enableAO)
-                renderXYZUVAO(face);
+                renderXYZUVAO(face, icon);
             else
-                renderXYZUV(face);
+                renderXYZUV(face, icon);
             return;
         }
 
@@ -289,7 +295,7 @@ public class ChamRenderLL
                 else
                     setUV(icon, minUDiv[ix], maxUDiv[ix], 1 - maxVDiv[iy], 1 - minVDiv[iy]);
 
-                renderXYZUVAO(face);
+                renderXYZUVAO(face, icon);
 
                 xyz[MINY] = xyz[MAXY];
             }
@@ -348,9 +354,9 @@ public class ChamRenderLL
                 setFaceXPosUV(icon, minZ, state.renderMinY, maxZ, state.renderMaxY);
 
             if (state.enableAO)
-                renderXYZUVAO(face);
+                renderXYZUVAO(face, icon);
             else
-                renderXYZUV(face);
+                renderXYZUV(face, icon);
             return;
         }
 
@@ -379,7 +385,7 @@ public class ChamRenderLL
                 else
                     setUV(icon, minUDiv[iz], maxUDiv[iz], 1 - maxVDiv[iy], 1 - minVDiv[iy]);
 
-                renderXYZUVAO(face);
+                renderXYZUVAO(face, icon);
 
                 xyz[MINY] = xyz[MAXY];
             }
@@ -416,9 +422,9 @@ public class ChamRenderLL
         setUV(icon, uMin, uMax, vMin, vMax);
 
         if (state.enableAO)
-            renderXYZUVAO(face);
+            renderXYZUVAO(face, icon);
         else
-            renderXYZUV(face);
+            renderXYZUV(face, icon);
     }
 
     private void setupUVPoints (double uStart, double vStart, double uStop, double vStop, int rangeU, int rangeV) {
@@ -503,12 +509,12 @@ public class ChamRenderLL
         xyz[5] = z + state.renderOffsetZ + state.renderMaxZ;
     }
 
-    private void renderXYZUV (EnumFacing facing) {
+    private void renderXYZUV (EnumFacing facing, TextureAtlasSprite icon) {
         if (isBaking) {
             if (bakedFormat == DefaultVertexFormats.BLOCK)
-                quadBuffer.add(bakeXYZUVBlock(facing, state.color, state.color, state.color, state.color));
+                quadBuffer.add(bakeXYZUVBlock(facing, icon, state.color, state.color, state.color, state.color));
             else if (bakedFormat == DefaultVertexFormats.ITEM)
-                quadBuffer.add(bakeXYZUVItem(facing, state.color, state.color, state.color, state.color));
+                quadBuffer.add(bakeXYZUVItem(facing, icon, state.color, state.color, state.color, state.color));
             return;
         }
 
@@ -538,13 +544,13 @@ public class ChamRenderLL
         setBlockVertex(index[TR], utr, vtr, state.color, state.brightness);
     }
 
-    private void renderXYZUVAO (EnumFacing facing) {
+    private void renderXYZUVAO (EnumFacing facing, TextureAtlasSprite icon) {
 
         if (isBaking) {
             if (bakedFormat == DefaultVertexFormats.BLOCK)
-                quadBuffer.add(bakeXYZUVBlock(facing, state.color, state.color, state.color, state.color));
+                quadBuffer.add(bakeXYZUVBlock(facing, icon, state.color, state.color, state.color, state.color));
             else if (bakedFormat == DefaultVertexFormats.ITEM)
-                quadBuffer.add(bakeXYZUVItem(facing, state.color, state.color, state.color, state.color));
+                quadBuffer.add(bakeXYZUVItem(facing, icon, state.color, state.color, state.color, state.color));
             return;
         }
 
@@ -575,7 +581,7 @@ public class ChamRenderLL
     }
 
     private void setBlockVertex (int[] xumap, double u, double v, float[] color, int brightness) {
-        WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
+        VertexBuffer tessellator = Tessellator.getInstance().getBuffer();
 
         if (tessellator.getVertexFormat().hasNormal()) {
             tessellator.pos(xyz[xumap[0]], xyz[xumap[1]], xyz[xumap[2]])
@@ -596,7 +602,7 @@ public class ChamRenderLL
         }
     }
 
-    private BakedQuad bakeXYZUVBlock (EnumFacing facing, float[] colorTL, float[] colorBL, float[] colorBR, float[] colorTR) {
+    private BakedQuad bakeXYZUVBlock (EnumFacing facing, TextureAtlasSprite icon, float[] colorTL, float[] colorBL, float[] colorBR, float[] colorTR) {
         int[][] index = xyzuvMap[facing.getIndex()];
         int uvRotate = state.uvRotate[facing.getIndex()];
 
@@ -651,10 +657,10 @@ public class ChamRenderLL
             Float.floatToRawIntBits((float)utr),
             Float.floatToRawIntBits((float)vtr),
             light
-        }, -1, facing);
+        }, bakedTintIndex, facing, icon, diffuseLight, getVertexFormat());
     }
 
-    private BakedQuad bakeXYZUVItem (EnumFacing facing, float[] colorTL, float[] colorBL, float[] colorBR, float[] colorTR) {
+    private BakedQuad bakeXYZUVItem (EnumFacing facing, TextureAtlasSprite icon, float[] colorTL, float[] colorBL, float[] colorBR, float[] colorTR) {
         int[][] index = xyzuvMap[facing.getIndex()];
         int uvRotate = state.uvRotate[facing.getIndex()];
 
@@ -707,7 +713,7 @@ public class ChamRenderLL
             Float.floatToRawIntBits((float)utr),
             Float.floatToRawIntBits((float)vtr),
             packNormal(state.normal)
-        }, -1, facing);
+        }, bakedTintIndex, facing, icon, diffuseLight, getVertexFormat());
     }
 
     private int packColor (float[] color) {

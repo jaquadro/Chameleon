@@ -1,6 +1,6 @@
 package com.jaquadro.minecraft.chameleon.render;
 
-import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.WorldVertexBufferUploader;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
@@ -17,26 +17,26 @@ public class ChamRenderManager
 
     private WorldVertexBufferUploader vboUploader = new WorldVertexBufferUploader();
     private Stack<ChamRender> freeRenderers = new Stack<ChamRender>();
-    private Map<WorldRenderer, ChamRender> renderers = new HashMap<WorldRenderer, ChamRender>();
+    private Map<VertexBuffer, ChamRender> renderers = new HashMap<VertexBuffer, ChamRender>();
 
     public ChamRenderManager () {
         lock = new ReentrantLock();
     }
 
-    public ChamRender getRenderer (WorldRenderer worldRenderer) {
+    public ChamRender getRenderer (VertexBuffer buffer) {
         lock.lock();
 
         try {
-            if (renderers.containsKey(worldRenderer))
-                return renderers.get(worldRenderer);
+            if (renderers.containsKey(buffer))
+                return renderers.get(buffer);
 
             if (freeRenderers.empty())
                 freeRenderers.push(new ChamRender());
 
             ChamRender renderer = freeRenderers.pop();
-            renderer.setWorldRenderer(worldRenderer);
+            renderer.setVertexBuffer(buffer);
 
-            renderers.put(worldRenderer, renderer);
+            renderers.put(buffer, renderer);
 
             return renderer;
         }
@@ -45,14 +45,14 @@ public class ChamRenderManager
         }
     }
 
-    public ChamRender startDrawing (WorldRenderer worldRenderer) {
-        return startDrawing(worldRenderer, DefaultVertexFormats.BLOCK);
+    public ChamRender startDrawing (VertexBuffer buffer) {
+        return startDrawing(buffer, DefaultVertexFormats.BLOCK);
     }
 
-    public ChamRender startDrawing (WorldRenderer worldRenderer, VertexFormat format) {
-        ChamRender renderer = getRenderer(worldRenderer);
+    public ChamRender startDrawing (VertexBuffer buffer, VertexFormat format) {
+        ChamRender renderer = getRenderer(buffer);
         try {
-            worldRenderer.begin(GL11.GL_QUADS, format);
+            buffer.begin(GL11.GL_QUADS, format);
         }
         catch (IllegalStateException e) { }
 
@@ -63,7 +63,7 @@ public class ChamRenderManager
         lock.lock();
 
         try {
-            WorldRenderer worldRenderer = renderer.getWorldRenderer();
+            VertexBuffer worldRenderer = renderer.getVertexBuffer();
             if (worldRenderer == null)
                 return;
 
@@ -73,7 +73,7 @@ public class ChamRenderManager
             } catch (IllegalStateException e) {
             }
 
-            renderer.setWorldRenderer(null);
+            renderer.setVertexBuffer(null);
             renderers.remove(worldRenderer);
             freeRenderers.push(renderer);
         }

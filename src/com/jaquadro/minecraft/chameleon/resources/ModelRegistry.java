@@ -3,19 +3,18 @@ package com.jaquadro.minecraft.chameleon.resources;
 import com.jaquadro.minecraft.chameleon.Chameleon;
 import com.jaquadro.minecraft.chameleon.resources.register.IBlockModelRegister;
 import com.jaquadro.minecraft.chameleon.resources.register.IItemModelRegister;
-import com.jaquadro.minecraft.chameleon.resources.register.ITextureRegister;
 import com.jaquadro.minecraft.chameleon.resources.register.IUnifiedRegister;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemMeshDefinition;
-import net.minecraft.client.renderer.entity.RenderItem;
-import net.minecraft.client.resources.model.IBakedModel;
-import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.client.renderer.RenderItem;
+import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IRegistry;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.IRegistry;
 import net.minecraftforge.fml.common.registry.GameData;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -80,7 +79,7 @@ public class ModelRegistry
         ResourceLocation loc = GameData.getBlockRegistry().getNameForObject(state.getBlock());
 
         StringBuilder builder = new StringBuilder();
-        for (Map.Entry<IProperty, Comparable> entry : state.getProperties().entrySet()) {
+        for (Map.Entry<IProperty<?>, Comparable<?>> entry : state.getProperties().entrySet()) {
             builder.append(entry.getKey().getName() + '=' + entry.getValue().toString() + ',');
         }
         builder.deleteCharAt(builder.length() - 1);
