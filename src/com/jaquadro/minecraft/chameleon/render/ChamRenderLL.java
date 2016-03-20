@@ -1,5 +1,6 @@
 package com.jaquadro.minecraft.chameleon.render;
 
+import com.jaquadro.minecraft.chameleon.model.EnumQuadGroup;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -9,6 +10,7 @@ import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
 
+import java.lang.reflect.Array;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
@@ -77,9 +79,12 @@ public class ChamRenderLL
     private double[] xyz = new double[6];
 
     private boolean isBaking;
+    private boolean faceGroup;
     private VertexFormat bakedFormat;
     private int bakedTintIndex = -1;
-    private List<BakedQuad> quadBuffer;
+    //private List<BakedQuad> quadBuffer;
+
+    private List<BakedQuad>[] quadBuffer;
 
     public ChamRenderLL (ChamRenderState state) {
         this.state = state;
@@ -91,15 +96,31 @@ public class ChamRenderLL
 
     public void startBaking (VertexFormat format, int tintIndex) {
         isBaking = true;
-        quadBuffer = new ArrayList<BakedQuad>();
+        //quadBuffer = new ArrayList<BakedQuad>();
         bakedFormat = format;
         bakedTintIndex = tintIndex;
+
+        if (quadBuffer == null) {
+            @SuppressWarnings("unchecked")
+            final List<BakedQuad>[] newBuffer = (List[]) Array.newInstance(ArrayList.class, 7);
+            quadBuffer = newBuffer;
+
+            for (int i = 0; i < quadBuffer.length; i++)
+                quadBuffer[i] = new ArrayList<BakedQuad>();
+        }
+
+        for (List<BakedQuad> buffer : quadBuffer)
+            buffer.clear();
     }
 
-    public List<BakedQuad> stopBaking () {
+    public void stopBaking () {
         isBaking = false;
-        List<BakedQuad> result = quadBuffer;
-        quadBuffer = null;
+    }
+
+    public List<BakedQuad> takeBakedQuads (EnumFacing dir) {
+        int index = (dir == null) ? 6 : dir.getIndex();
+        List<BakedQuad> result = quadBuffer[index];
+        quadBuffer[index] = new ArrayList<BakedQuad>();
         return result;
     }
 
@@ -109,6 +130,12 @@ public class ChamRenderLL
 
     public VertexFormat getVertexFormat () {
         return bakedFormat;
+    }
+
+    public void drawFace (EnumFacing face, double x, double y, double z, TextureAtlasSprite icon, boolean isFaceGroup) {
+        faceGroup = isFaceGroup;
+        drawFace(face, x, y, z, icon);
+        faceGroup = false;
     }
 
     public void drawFace (EnumFacing face, double x, double y, double z, TextureAtlasSprite icon) {
@@ -411,6 +438,12 @@ public class ChamRenderLL
             setUV(icon, maxY + state.shiftU, minY + state.shiftU, 1 - maxZ + state.shiftV, 1 - minZ + state.shiftV);
     }
 
+    public void drawPartialFace (EnumFacing face, double x, double y, double z, TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax, boolean isFaceGroup) {
+        faceGroup = isFaceGroup;
+        drawPartialFace(face, x, y, z, icon, uMin, vMin, uMax, vMax);
+        faceGroup = false;
+    }
+
     public void drawPartialFace (EnumFacing face, double x, double y, double z, TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax) {
         setXYZ(x, y, z);
         setUV(icon, uMin, uMax, vMin, vMax);
@@ -503,12 +536,17 @@ public class ChamRenderLL
         xyz[5] = z + state.renderOffsetZ + state.renderMaxZ;
     }
 
+    private int getFacingIndex (EnumFacing dir) {
+        return (dir == null || !faceGroup) ? 6 : dir.getIndex();
+    }
+
     private void renderXYZUV (EnumFacing facing) {
         if (isBaking) {
+            int index = getFacingIndex(facing);
             if (bakedFormat == DefaultVertexFormats.BLOCK)
-                quadBuffer.add(bakeXYZUVBlock(facing, state.color, state.color, state.color, state.color));
+                quadBuffer[index].add(bakeXYZUVBlock(facing, state.color, state.color, state.color, state.color));
             else if (bakedFormat == DefaultVertexFormats.ITEM)
-                quadBuffer.add(bakeXYZUVItem(facing, state.color, state.color, state.color, state.color));
+                quadBuffer[index].add(bakeXYZUVItem(facing, state.color, state.color, state.color, state.color));
             return;
         }
 
@@ -541,10 +579,11 @@ public class ChamRenderLL
     private void renderXYZUVAO (EnumFacing facing) {
 
         if (isBaking) {
+            int index = getFacingIndex(facing);
             if (bakedFormat == DefaultVertexFormats.BLOCK)
-                quadBuffer.add(bakeXYZUVBlock(facing, state.color, state.color, state.color, state.color));
+                quadBuffer[index].add(bakeXYZUVBlock(facing, state.color, state.color, state.color, state.color));
             else if (bakedFormat == DefaultVertexFormats.ITEM)
-                quadBuffer.add(bakeXYZUVItem(facing, state.color, state.color, state.color, state.color));
+                quadBuffer[index].add(bakeXYZUVItem(facing, state.color, state.color, state.color, state.color));
             return;
         }
 

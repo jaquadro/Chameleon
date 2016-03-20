@@ -49,6 +49,8 @@ public class ChamRender
 
     public ChamRenderState state = new ChamRenderState();
 
+    private boolean drawToFaceGroup;
+
     private ChamRenderAO aoHelper = new ChamRenderAO(state);
     private ChamRenderLL llHelper = new ChamRenderLL(state);
 
@@ -88,6 +90,10 @@ public class ChamRender
 
     WorldRenderer getWorldRenderer () {
         return tessellator;
+    }
+
+    public void targetFaceGroup (boolean target) {
+        drawToFaceGroup = target;
     }
 
     public void renderEmptyPlane (BlockPos pos) {
@@ -160,24 +166,24 @@ public class ChamRender
         setupColorMult(face, blockAccess, blockState, pos, r, g, b);
 
         face = EnumFacing.getFront(ChamRenderState.FACE_BY_FACE_ROTATION[face.getIndex()][state.rotateTransform]);
-        llHelper.drawFace(face, pos.getX(), pos.getY(), pos.getZ(), icon);
+        llHelper.drawFace(face, pos.getX(), pos.getY(), pos.getZ(), icon, drawToFaceGroup);
 
         if (blockAccess == null && !llHelper.isBaking())
             Tessellator.getInstance().draw();
     }
 
-    public void bakeFace (EnumFacing face, IBlockState blockState, TextureAtlasSprite icon) {
+    public void bakeFace (EnumFacing face, IBlockState blockState, TextureAtlasSprite icon, boolean isFaceGroup) {
         calculateBaseColor(colorScratch, blockState.getBlock().getRenderColor(blockState));
-        bakeFace(face, blockState, icon, colorScratch[0], colorScratch[1], colorScratch[2]);
+        bakeFace(face, blockState, icon, isFaceGroup, colorScratch[0], colorScratch[1], colorScratch[2]);
     }
 
-    public void bakeFace (EnumFacing face, IBlockState blockState, TextureAtlasSprite icon, float r, float g, float b) {
+    public void bakeFace (EnumFacing face, IBlockState blockState, TextureAtlasSprite icon, boolean isFaceGroup, float r, float g, float b) {
         float scale = state.getColorMult(face);
         state.setColor(r * scale, g * scale, b * scale);
         state.setNormal(normMap[face.getIndex()]);
 
         face = EnumFacing.getFront(ChamRenderState.FACE_BY_FACE_ROTATION[face.getIndex()][state.rotateTransform]);
-        llHelper.drawFace(face, 0, 0, 0, icon);
+        llHelper.drawFace(face, 0, 0, 0, icon, isFaceGroup);
     }
     
     public void renderFaceAOPartial (EnumFacing face, IBlockAccess blockAccess, IBlockState blockState, BlockPos pos, TextureAtlasSprite icon, float r, float g, float b) {
@@ -239,18 +245,18 @@ public class ChamRender
             Tessellator.getInstance().draw();
     }
 
-    public void bakePartialFace (EnumFacing face, IBlockState blockState, TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax) {
+    public void bakePartialFace (EnumFacing face, IBlockState blockState, TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax, boolean isFaceGroup) {
         calculateBaseColor(colorScratch, blockState.getBlock().getRenderColor(blockState));
-        bakePartialFace(face, blockState, icon, uMin, vMin, uMax, vMax, colorScratch[0], colorScratch[1], colorScratch[2]);
+        bakePartialFace(face, blockState, icon, uMin, vMin, uMax, vMax, isFaceGroup, colorScratch[0], colorScratch[1], colorScratch[2]);
     }
 
-    public void bakePartialFace (EnumFacing face, IBlockState blockState, TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax, float r, float g, float b) {
+    public void bakePartialFace (EnumFacing face, IBlockState blockState, TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax, boolean isFaceGroup, float r, float g, float b) {
         float scale = state.getColorMult(face);
         state.setColor(r * scale, g * scale, b * scale);
         state.setNormal(normMap[face.getIndex()]);
 
         face = EnumFacing.getFront(ChamRenderState.FACE_BY_FACE_ROTATION[face.getIndex()][state.rotateTransform]);
-        llHelper.drawPartialFace(face, 0, 0, 0, icon, uMin, vMin, uMax, vMax);
+        llHelper.drawPartialFace(face, 0, 0, 0, icon, uMin, vMin, uMax, vMax, isFaceGroup);
     }
 
     public void renderPartialFaceAOPartial (EnumFacing face, IBlockAccess blockAccess, IBlockState blockState, BlockPos pos, TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax, float r, float g, float b) {
@@ -284,12 +290,12 @@ public class ChamRender
     public void renderPartialFace (EnumFacing face, TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax) {
         state.enableAO = false;
         face = EnumFacing.getFront(ChamRenderState.FACE_BY_FACE_ROTATION[face.getIndex()][state.rotateTransform]);
-        llHelper.drawPartialFace(face, 0, 0, 0, icon, uMin, vMin, uMax, vMax);
+        llHelper.drawPartialFace(face, 0, 0, 0, icon, uMin, vMin, uMax, vMax, drawToFaceGroup);
     }
 
     public void renderPartialFace (EnumFacing face, double x, double y, double z, TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax) {
         face = EnumFacing.getFront(ChamRenderState.FACE_BY_FACE_ROTATION[face.getIndex()][state.rotateTransform]);
-        llHelper.drawPartialFace(face, x, y, z, icon, uMin, vMin, uMax, vMax);
+        llHelper.drawPartialFace(face, x, y, z, icon, uMin, vMin, uMax, vMax, drawToFaceGroup);
     }
 
     /*public void renderCrossedSquares (Block block, int meta) {
@@ -447,11 +453,13 @@ public class ChamRender
         llHelper.startBaking(format, tintIndex);
     }
 
-    public List<BakedQuad> stopBaking () {
-        return llHelper.stopBaking();
+    public void stopBaking () {
+        llHelper.stopBaking();
     }
 
-
+    public List<BakedQuad> takeBakedQuads (EnumFacing dir) {
+        return llHelper.takeBakedQuads(dir);
+    }
 
     private void setupColorMult (EnumFacing face, float r, float g, float b) {
         //if (tessellator == null)
