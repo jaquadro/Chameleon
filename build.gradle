@@ -20,7 +20,7 @@ plugins {
 }
 */
 
-version = "1.8.9-0.3.0"
+version = "1.8.9-1.0.0"
 group= "com.jaquadro.minecraft.chameleon" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "Chameleon"
 
