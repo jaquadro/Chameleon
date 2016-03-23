@@ -25,7 +25,7 @@ public abstract class SmartHandlerRegister<TBlock extends ISmartBlockModel, TIte
     }
 
     @Override
-    public IBakedModel getModel (IBlockState state) {
+    public IBakedModel getModel (IBlockState state, IBakedModel existingModel) {
         if (blockModel == null) {
             try {
                 blockModel = blockClass.newInstance();
@@ -35,7 +35,7 @@ public abstract class SmartHandlerRegister<TBlock extends ISmartBlockModel, TIte
     }
 
     @Override
-    public IBakedModel getModel (ItemStack stack) {
+    public IBakedModel getModel (ItemStack stack, IBakedModel existingModel) {
         if (itemModel == null) {
             try {
                 itemModel = itemClass.newInstance();

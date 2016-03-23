@@ -52,14 +52,18 @@ public class ModelRegistry
 
     public void loadModels (IRegistry<ModelResourceLocation, IBakedModel> modelIRegistry) {
         for (IBlockModelRegister register : blockRegistry) {
-            for (IBlockState state : register.getBlockStates())
-                modelIRegistry.putObject(getResourceLocation(state), register.getModel(state));
+            for (IBlockState state : register.getBlockStates()) {
+                ModelResourceLocation location = getResourceLocation(state);
+                modelIRegistry.putObject(location, register.getModel(state, modelIRegistry.getObject(location)));
+            }
         }
 
         for (IItemModelRegister register : itemRegistry) {
             Item item = register.getItem();
-            for (ItemStack stack : register.getItemVariants())
-                modelIRegistry.putObject(getResourceLocation(stack), register.getModel(stack));
+            for (ItemStack stack : register.getItemVariants()) {
+                ModelResourceLocation location = getResourceLocation(stack);
+                modelIRegistry.putObject(location, register.getModel(stack, modelIRegistry.getObject(location)));
+            }
 
             RenderItem renderItem = Minecraft.getMinecraft().getRenderItem();
             if (item instanceof IItemMeshResolver)
