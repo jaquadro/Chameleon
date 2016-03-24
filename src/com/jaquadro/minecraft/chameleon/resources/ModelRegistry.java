@@ -11,6 +11,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.resources.model.IBakedModel;
+import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -37,8 +38,10 @@ public class ModelRegistry
     }
 
     public void registerModel (IItemModelRegister modelRegister) {
-        if (modelRegister != null)
+        if (modelRegister != null) {
             itemRegistry.add(modelRegister);
+            registerItemVariants(modelRegister.getItem());
+        }
     }
 
     public void registerModel (IUnifiedRegister modelRegister) {
@@ -46,7 +49,20 @@ public class ModelRegistry
             blockRegistry.add(modelRegister);
             itemRegistry.add(modelRegister);
 
+            registerItemVariants(modelRegister.getItem());
             registerTextureResources(modelRegister.getTextureResources());
+        }
+    }
+
+    public void registerItemVariants (Item item) {
+        if (item instanceof IItemVariantProvider)
+            registerItemVariants(item, (IItemVariantProvider) item);
+    }
+
+    public void registerItemVariants (Item item, IItemVariantProvider provider) {
+        if (item != null && provider != null) {
+            List<ResourceLocation> variants = ((IItemVariantProvider) item).getItemVariants();
+            ModelBakery.registerItemVariants(item, variants.toArray(new ResourceLocation[variants.size()]));
         }
     }
 
