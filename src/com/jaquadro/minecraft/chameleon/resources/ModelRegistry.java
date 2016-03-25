@@ -14,6 +14,7 @@ import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IRegistry;
 import net.minecraft.util.ResourceLocation;
@@ -53,9 +54,11 @@ public class ModelRegistry
     }
 
     public void registerItemVariants (Block block) {
-        Item item = Item.getItemFromBlock(block);
-        registerItemVariants(item);
-        registerItemMapping(item);
+        if (block != null) {
+            Item item = Item.getItemFromBlock(block);
+            registerItemVariants(item);
+            registerItemMapping(item);
+        }
     }
 
     public void registerItemVariants (Item item) {
@@ -149,6 +152,10 @@ public class ModelRegistry
             }
         }
 
-        return new ModelResourceLocation(GameData.getItemRegistry().getNameForObject(item).toString(), "inventory");
+        Block block = Block.getBlockFromItem(item);
+        if (block != null)
+            return new ModelResourceLocation(GameData.getBlockRegistry().getNameForObject(block).toString(), "inventory");
+        else
+            return new ModelResourceLocation(GameData.getItemRegistry().getNameForObject(item).toString(), "inventory");
     }
 }
