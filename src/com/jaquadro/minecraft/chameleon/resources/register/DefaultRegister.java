@@ -1,9 +1,12 @@
 package com.jaquadro.minecraft.chameleon.resources.register;
 
+import com.jaquadro.minecraft.chameleon.resources.IItemMeshMapper;
 import net.minecraft.block.Block;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +28,13 @@ public abstract class DefaultRegister implements IUnifiedRegister
     public List<ItemStack> getItemVariants () {
         Item item = getItem();
         List<ItemStack> variants = new ArrayList<ItemStack>();
-        item.getSubItems(item, null, variants);
+
+        if (item instanceof IItemMeshMapper) {
+            for (Pair<ItemStack, ModelResourceLocation> pair : ((IItemMeshMapper) item).getMeshMappings())
+                variants.add(pair.getKey());
+        }
+        else
+            item.getSubItems(item, null, variants);
 
         return variants;
     }
