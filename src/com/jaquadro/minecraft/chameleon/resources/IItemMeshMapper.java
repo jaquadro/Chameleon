@@ -9,5 +9,4 @@ import java.util.List;
 public interface IItemMeshMapper
 {
     List<Pair<ItemStack, ModelResourceLocation>> getMeshMappings ();
-    //ItemMeshDefinition getMeshResolver ();
 }

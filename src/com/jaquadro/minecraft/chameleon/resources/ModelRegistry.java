@@ -57,18 +57,30 @@ public class ModelRegistry
         if (block != null) {
             Item item = Item.getItemFromBlock(block);
             registerItemVariants(item);
-            registerItemMapping(item);
         }
     }
 
     public void registerItemVariants (Item item) {
+        registerItemMapping(item);
         if (item instanceof IItemVariantProvider)
             registerItemVariants(item, (IItemVariantProvider) item);
+        else if (item instanceof IItemMeshMapper)
+            registerItemVariants(item, (IItemMeshMapper) item);
     }
 
     public void registerItemVariants (Item item, IItemVariantProvider provider) {
         if (item != null && provider != null) {
             List<ResourceLocation> variants = ((IItemVariantProvider) item).getItemVariants();
+            ModelBakery.registerItemVariants(item, variants.toArray(new ResourceLocation[variants.size()]));
+        }
+    }
+
+    public void registerItemVariants (Item item, IItemMeshMapper mapper) {
+        if (item != null && mapper != null) {
+            List<ResourceLocation> variants = new ArrayList<ResourceLocation>();
+            for (Pair<ItemStack, ModelResourceLocation> pair : mapper.getMeshMappings())
+                variants.add(pair.getValue());
+
             ModelBakery.registerItemVariants(item, variants.toArray(new ResourceLocation[variants.size()]));
         }
     }
