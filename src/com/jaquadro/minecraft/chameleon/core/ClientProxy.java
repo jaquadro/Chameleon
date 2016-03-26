@@ -17,7 +17,7 @@ public class ClientProxy extends CommonProxy
 
     @SubscribeEvent
     public void onPreTextureStitch (TextureStitchEvent.Pre event) {
-        Chameleon.instance.iconRegistry.loadIcons(event.map);
+        Chameleon.instance.iconRegistry.loadIcons(event.getMap());
     }
 
     @SubscribeEvent

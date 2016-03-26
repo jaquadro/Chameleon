@@ -11,7 +11,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-@Mod(modid = Chameleon.MOD_ID, name = Chameleon.MOD_NAME, version = Chameleon.MOD_VERSION)
+@Mod(modid = Chameleon.MOD_ID, name = Chameleon.MOD_NAME, version = Chameleon.MOD_VERSION, dependencies = "required-after:Forge@[12.16.0.1805,);")
 public class Chameleon
 {
     public static final String MOD_ID = "Chameleon";
