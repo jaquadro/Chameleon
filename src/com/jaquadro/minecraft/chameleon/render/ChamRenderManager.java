@@ -19,6 +19,8 @@ public class ChamRenderManager
     private Stack<ChamRender> freeRenderers = new Stack<ChamRender>();
     private Map<WorldRenderer, ChamRender> renderers = new HashMap<WorldRenderer, ChamRender>();
 
+    public static final ChamRenderManager instance = new ChamRenderManager();
+
     public ChamRenderManager () {
         lock = new ReentrantLock();
     }
@@ -27,8 +29,10 @@ public class ChamRenderManager
         lock.lock();
 
         try {
-            if (renderers.containsKey(worldRenderer))
-                return renderers.get(worldRenderer);
+            if (worldRenderer != null) {
+                if (renderers.containsKey(worldRenderer))
+                    return renderers.get(worldRenderer);
+            }
 
             if (freeRenderers.empty())
                 freeRenderers.push(new ChamRender());
@@ -36,7 +40,8 @@ public class ChamRenderManager
             ChamRender renderer = freeRenderers.pop();
             renderer.setWorldRenderer(worldRenderer);
 
-            renderers.put(worldRenderer, renderer);
+            if (worldRenderer != null)
+                renderers.put(worldRenderer, renderer);
 
             return renderer;
         }
@@ -45,8 +50,22 @@ public class ChamRenderManager
         }
     }
 
+    public void releaseRenderer (ChamRender renderer) {
+        lock.lock();
+
+        try {
+            if (renderer.getWorldRenderer() != null)
+                renderers.remove(renderer.getWorldRenderer());
+            renderer.setWorldRenderer(null);
+            freeRenderers.push(renderer);
+        }
+        finally {
+            lock.unlock();
+        }
+    }
+
     public ChamRender startDrawing (WorldRenderer worldRenderer) {
-        return startDrawing(worldRenderer, DefaultVertexFormats.BLOCK);
+        return startDrawing(worldRenderer, DefaultVertexFormats.ITEM);
     }
 
     public ChamRender startDrawing (WorldRenderer worldRenderer, VertexFormat format) {

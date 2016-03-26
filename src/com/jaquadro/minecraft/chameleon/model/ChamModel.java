@@ -1,6 +1,7 @@
 package com.jaquadro.minecraft.chameleon.model;
 
 import com.jaquadro.minecraft.chameleon.render.ChamRender;
+import com.jaquadro.minecraft.chameleon.render.ChamRenderManager;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -48,7 +49,7 @@ public abstract class ChamModel extends BlockModel
                 transCache[i] = EMPTY;
         }
 
-        ChamRender renderer = ChamRender.instance;
+        ChamRender renderer = ChamRenderManager.instance.getRenderer(null);
         renderStart(renderer, state, args);
 
         if (!mergeLayers) {
@@ -88,6 +89,7 @@ public abstract class ChamModel extends BlockModel
         }
 
         renderEnd(renderer, state, args);
+        ChamRenderManager.instance.releaseRenderer(renderer);
     }
 
     @Override
@@ -137,6 +139,6 @@ public abstract class ChamModel extends BlockModel
     private void updateCache (List<BakedQuad>[] cache, ChamRender renderer) {
         cache[6] = renderer.takeBakedQuads(null);
         for (EnumFacing facing : EnumFacing.VALUES)
-            cache[facing.getIndex()] = ChamRender.instance.takeBakedQuads(facing);
+            cache[facing.getIndex()] = renderer.takeBakedQuads(facing);
     }
 }

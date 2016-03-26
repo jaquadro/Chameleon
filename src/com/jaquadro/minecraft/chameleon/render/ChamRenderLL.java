@@ -1,6 +1,5 @@
 package com.jaquadro.minecraft.chameleon.render;
 
-import com.jaquadro.minecraft.chameleon.model.EnumQuadGroup;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -64,6 +63,7 @@ public class ChamRenderLL
     };
 
     private ChamRenderState state;
+    private WorldRenderer tessellator;
 
     private double[] minUDiv = new double[24];
     private double[] maxUDiv = new double[24];
@@ -130,6 +130,10 @@ public class ChamRenderLL
 
     public VertexFormat getVertexFormat () {
         return bakedFormat;
+    }
+
+    public void setTesseleator (WorldRenderer tessellator) {
+        this.tessellator = tessellator;
     }
 
     public void drawFace (EnumFacing face, double x, double y, double z, TextureAtlasSprite icon, boolean isFaceGroup) {
@@ -614,7 +618,8 @@ public class ChamRenderLL
     }
 
     private void setBlockVertex (int[] xumap, double u, double v, float[] color, int brightness) {
-        WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
+        if (tessellator == null)
+            return;
 
         if (tessellator.getVertexFormat().hasNormal()) {
             tessellator.pos(xyz[xumap[0]], xyz[xumap[1]], xyz[xumap[2]])

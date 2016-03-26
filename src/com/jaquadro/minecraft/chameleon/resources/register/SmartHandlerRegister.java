@@ -17,6 +17,7 @@ public abstract class SmartHandlerRegister<TBlock extends ISmartBlockModel, TIte
     private ISmartBlockModel blockModel;
     private ISmartItemModel itemModel;
 
+    @SuppressWarnings("unchecked")
     public SmartHandlerRegister (Block block) {
         super(block);
 

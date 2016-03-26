@@ -56,6 +56,7 @@ public class ChamRender
 
     private float[] colorScratch = new float[3];
 
+    @Deprecated
     public static ChamRender instance = new ChamRender();
 
     public static void calculateBaseColor (float[] target, int color) {
@@ -86,6 +87,7 @@ public class ChamRender
 
     void setWorldRenderer (WorldRenderer worldRenderer) {
         tessellator = worldRenderer;
+        llHelper.setTesseleator(worldRenderer);
     }
 
     WorldRenderer getWorldRenderer () {
@@ -314,11 +316,7 @@ public class ChamRender
         boolean lighting = GL11.glIsEnabled(GL11.GL_LIGHTING);
         GL11.glDisable(GL11.GL_LIGHTING);
 
-        //tessellator.startDrawingQuads();
-
         drawCrossedSquares(icon, 0, 0, 0, 1.0F);
-
-        //Tessellator.getInstance().draw();
 
         if (lighting)
             GL11.glEnable(GL11.GL_LIGHTING);
@@ -346,7 +344,6 @@ public class ChamRender
     {
         if (tessellator == null)
             return;
-        //WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
 
         x += state.renderOffsetX;
         y += state.renderOffsetY;
@@ -388,7 +385,6 @@ public class ChamRender
     {
         if (tessellator == null)
             return;
-        //WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
 
         x += state.renderOffsetX;
         y += state.renderOffsetY;
@@ -462,27 +458,19 @@ public class ChamRender
     }
 
     private void setupColorMult (EnumFacing face, float r, float g, float b) {
-        //if (tessellator == null)
-        //    return;
-
-        WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
         float[] norm = normMap[face.getIndex()];
         float scale = state.getColorMult(face);
 
         state.setColor(scale * r, scale * g, scale * b);
         state.setNormal(norm);
 
-        if (!llHelper.isBaking())
+        if (!llHelper.isBaking() && tessellator != null)
             tessellator.begin(GL11.GL_QUADS, DefaultVertexFormats.ITEM);
 
         state.enableAO = false;
     }
 
     private void setupColorMult (EnumFacing face, IBlockAccess blockAccess, IBlockState blockState, BlockPos pos, float r, float g, float b) {
-        //if (tessellator == null)
-        //    return;
-
-        WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
         float[] norm = normMap[face.getIndex()];
         float scale = state.getColorMult(face);
 
@@ -490,7 +478,7 @@ public class ChamRender
                 state.setColor(r * scale, g * scale, b * scale);
                 state.setNormal(norm);
 
-            if (!llHelper.isBaking())
+            if (!llHelper.isBaking() && tessellator != null)
                 tessellator.begin(GL11.GL_QUADS, DefaultVertexFormats.ITEM);
         }
         else {
@@ -522,10 +510,8 @@ public class ChamRender
     }
 
     private void addBlockVertex (double x, double y, double z, double u, double v) {
-
-        if (tessellator.getVertexFormat().hasNormal()) {
+        if (tessellator.getVertexFormat().hasNormal())
             tessellator.pos(x, y, z).tex(u, v).normal(state.normal[0], state.normal[1], state.normal[2]).color(state.color[0], state.color[1], state.color[2], 1).endVertex();
-        }
         else {
             int lsky = (state.brightness >> 16) & 255;
             int lblk = (state.brightness & 255);
