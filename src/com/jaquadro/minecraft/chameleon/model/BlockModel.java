@@ -5,10 +5,15 @@ import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.block.model.ItemOverrideList;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.lwjgl.util.vector.Vector3f;
 
 @SideOnly(Side.CLIENT)
 public abstract class BlockModel implements IBakedModel
 {
+    private static final ItemTransformVec3f transformThirdPerson = new ItemTransformVec3f(new Vector3f(10, -45, 170), new Vector3f(0, 0.09375f, -0.078125f), new Vector3f(.375f, .375f, .375f));
+    private static final ItemCameraTransforms transform = new ItemCameraTransforms(transformThirdPerson,
+        ItemTransformVec3f.DEFAULT, ItemTransformVec3f.DEFAULT, ItemTransformVec3f.DEFAULT, ItemTransformVec3f.DEFAULT, ItemTransformVec3f.DEFAULT);
+
     @Override
     public boolean isAmbientOcclusion () {
         return true;
@@ -26,7 +31,7 @@ public abstract class BlockModel implements IBakedModel
 
     @Override
     public ItemCameraTransforms getItemCameraTransforms () {
-        return ItemCameraTransforms.DEFAULT;
+        return transform;
     }
 
     @Override

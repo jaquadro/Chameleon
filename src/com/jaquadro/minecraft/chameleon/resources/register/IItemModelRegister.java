@@ -12,5 +12,5 @@ public interface IItemModelRegister
 
     List<ItemStack> getItemVariants ();
 
-    IBakedModel getModel (ItemStack stack);
+    IBakedModel getModel (ItemStack stack, IBakedModel existingModel);
 }

@@ -52,11 +52,14 @@ public class ChamRender
 
     public ChamRenderState state = new ChamRenderState();
 
+    private boolean drawToFaceGroup;
+
     private ChamRenderAO aoHelper = new ChamRenderAO(state);
     private ChamRenderLL llHelper = new ChamRenderLL(state);
 
     private float[] colorScratch = new float[3];
 
+    @Deprecated
     public static ChamRender instance = new ChamRender();
 
     public static void calculateBaseColor (float[] target, int color) {
@@ -87,10 +90,15 @@ public class ChamRender
 
     void setVertexBuffer (VertexBuffer buffer) {
         tessellator = buffer;
+        llHelper.setTesseleator(worldRenderer);
     }
 
     VertexBuffer getVertexBuffer () {
         return tessellator;
+    }
+
+    public void targetFaceGroup (boolean target) {
+        drawToFaceGroup = target;
     }
 
     public void renderEmptyPlane (BlockPos pos) {
@@ -164,24 +172,24 @@ public class ChamRender
         setupColorMult(face, blockAccess, blockState, pos, r, g, b);
 
         face = EnumFacing.getFront(ChamRenderState.FACE_BY_FACE_ROTATION[face.getIndex()][state.rotateTransform]);
-        llHelper.drawFace(face, pos.getX(), pos.getY(), pos.getZ(), icon);
+        llHelper.drawFace(face, pos.getX(), pos.getY(), pos.getZ(), icon, drawToFaceGroup);
 
         if (blockAccess == null && !llHelper.isBaking())
             Tessellator.getInstance().draw();
     }
 
-    public void bakeFace (EnumFacing face, IBlockState blockState, TextureAtlasSprite icon) {
+    public void bakeFace (EnumFacing face, IBlockState blockState, TextureAtlasSprite icon, boolean isFaceGroup) {
         //calculateBaseColor(colorScratch, blockState.getBlock().getRenderColor(blockState));
-        bakeFace(face, blockState, icon, 1, 1, 1);
+        bakeFace(face, blockState, icon, isFaceGroup, 1, 1, 1);
     }
 
-    public void bakeFace (EnumFacing face, IBlockState blockState, TextureAtlasSprite icon, float r, float g, float b) {
+    public void bakeFace (EnumFacing face, IBlockState blockState, TextureAtlasSprite icon, boolean isFaceGroup, float r, float g, float b) {
         float scale = state.getColorMult(face);
         state.setColor(r * scale, g * scale, b * scale);
         state.setNormal(normMap[face.getIndex()]);
 
         face = EnumFacing.getFront(ChamRenderState.FACE_BY_FACE_ROTATION[face.getIndex()][state.rotateTransform]);
-        llHelper.drawFace(face, 0, 0, 0, icon);
+        llHelper.drawFace(face, 0, 0, 0, icon, isFaceGroup);
     }
     
     public void renderFaceAOPartial (EnumFacing face, IBlockAccess blockAccess, IBlockState blockState, BlockPos pos, TextureAtlasSprite icon, float r, float g, float b) {
@@ -243,18 +251,18 @@ public class ChamRender
             Tessellator.getInstance().draw();
     }
 
-    public void bakePartialFace (EnumFacing face, IBlockState blockState, TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax) {
+    public void bakePartialFace (EnumFacing face, IBlockState blockState, TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax, boolean isFaceGroup) {
         //calculateBaseColor(colorScratch, blockState.getBlock().getRenderColor(blockState));
-        bakePartialFace(face, blockState, icon, uMin, vMin, uMax, vMax, 1, 1, 1);
+        bakePartialFace(face, blockState, icon, uMin, vMin, uMax, vMax, isFaceGroup, 1, 1, 1);
     }
 
-    public void bakePartialFace (EnumFacing face, IBlockState blockState, TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax, float r, float g, float b) {
+    public void bakePartialFace (EnumFacing face, IBlockState blockState, TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax, boolean isFaceGroup, float r, float g, float b) {
         float scale = state.getColorMult(face);
         state.setColor(r * scale, g * scale, b * scale);
         state.setNormal(normMap[face.getIndex()]);
 
         face = EnumFacing.getFront(ChamRenderState.FACE_BY_FACE_ROTATION[face.getIndex()][state.rotateTransform]);
-        llHelper.drawPartialFace(face, 0, 0, 0, icon, uMin, vMin, uMax, vMax);
+        llHelper.drawPartialFace(face, 0, 0, 0, icon, uMin, vMin, uMax, vMax, isFaceGroup);
     }
 
     public void renderPartialFaceAOPartial (EnumFacing face, IBlockAccess blockAccess, IBlockState blockState, BlockPos pos, TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax, float r, float g, float b) {
@@ -288,12 +296,12 @@ public class ChamRender
     public void renderPartialFace (EnumFacing face, TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax) {
         state.enableAO = false;
         face = EnumFacing.getFront(ChamRenderState.FACE_BY_FACE_ROTATION[face.getIndex()][state.rotateTransform]);
-        llHelper.drawPartialFace(face, 0, 0, 0, icon, uMin, vMin, uMax, vMax);
+        llHelper.drawPartialFace(face, 0, 0, 0, icon, uMin, vMin, uMax, vMax, drawToFaceGroup);
     }
 
     public void renderPartialFace (EnumFacing face, double x, double y, double z, TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax) {
         face = EnumFacing.getFront(ChamRenderState.FACE_BY_FACE_ROTATION[face.getIndex()][state.rotateTransform]);
-        llHelper.drawPartialFace(face, x, y, z, icon, uMin, vMin, uMax, vMax);
+        llHelper.drawPartialFace(face, x, y, z, icon, uMin, vMin, uMax, vMax, drawToFaceGroup);
     }
 
     /*public void renderCrossedSquares (Block block, int meta) {
@@ -312,11 +320,7 @@ public class ChamRender
         boolean lighting = GL11.glIsEnabled(GL11.GL_LIGHTING);
         GL11.glDisable(GL11.GL_LIGHTING);
 
-        //tessellator.startDrawingQuads();
-
         drawCrossedSquares(icon, 0, 0, 0, 1.0F);
-
-        //Tessellator.getInstance().draw();
 
         if (lighting)
             GL11.glEnable(GL11.GL_LIGHTING);
@@ -344,7 +348,6 @@ public class ChamRender
     {
         if (tessellator == null)
             return;
-        //WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
 
         x += state.renderOffsetX;
         y += state.renderOffsetY;
@@ -386,7 +389,6 @@ public class ChamRender
     {
         if (tessellator == null)
             return;
-        //WorldRenderer tessellator = Tessellator.getInstance().getWorldRenderer();
 
         x += state.renderOffsetX;
         y += state.renderOffsetY;
@@ -451,34 +453,28 @@ public class ChamRender
         llHelper.startBaking(format, tintIndex);
     }
 
-    public List<BakedQuad> stopBaking () {
-        return llHelper.stopBaking();
+    public void stopBaking () {
+        llHelper.stopBaking();
     }
 
-
+    public List<BakedQuad> takeBakedQuads (EnumFacing dir) {
+        return llHelper.takeBakedQuads(dir);
+    }
 
     private void setupColorMult (EnumFacing face, float r, float g, float b) {
-        //if (tessellator == null)
-        //    return;
-
-        VertexBuffer tessellator = Tessellator.getInstance().getBuffer();
         float[] norm = normMap[face.getIndex()];
         float scale = state.getColorMult(face);
 
         state.setColor(scale * r, scale * g, scale * b);
         state.setNormal(norm);
 
-        if (!llHelper.isBaking())
+        if (!llHelper.isBaking() && tessellator != null)
             tessellator.begin(GL11.GL_QUADS, DefaultVertexFormats.ITEM);
 
         state.enableAO = false;
     }
 
     private void setupColorMult (EnumFacing face, IBlockAccess blockAccess, IBlockState blockState, BlockPos pos, float r, float g, float b) {
-        //if (tessellator == null)
-        //    return;
-
-        VertexBuffer tessellator = Tessellator.getInstance().getBuffer();
         float[] norm = normMap[face.getIndex()];
         float scale = state.getColorMult(face);
 
@@ -486,7 +482,7 @@ public class ChamRender
                 state.setColor(r * scale, g * scale, b * scale);
                 state.setNormal(norm);
 
-            if (!llHelper.isBaking())
+            if (!llHelper.isBaking() && tessellator != null)
                 tessellator.begin(GL11.GL_QUADS, DefaultVertexFormats.ITEM);
         }
         else {
@@ -518,10 +514,8 @@ public class ChamRender
     }
 
     private void addBlockVertex (double x, double y, double z, double u, double v) {
-
-        if (tessellator.getVertexFormat().hasNormal()) {
+        if (tessellator.getVertexFormat().hasNormal())
             tessellator.pos(x, y, z).tex(u, v).normal(state.normal[0], state.normal[1], state.normal[2]).color(state.color[0], state.color[1], state.color[2], 1).endVertex();
-        }
         else {
             int lsky = (state.brightness >> 16) & 255;
             int lblk = (state.brightness & 255);

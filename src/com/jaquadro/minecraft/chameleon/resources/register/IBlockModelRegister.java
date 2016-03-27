@@ -9,5 +9,5 @@ public interface IBlockModelRegister
 {
     List<IBlockState> getBlockStates ();
 
-    IBakedModel getModel (IBlockState state);
+    IBakedModel getModel (IBlockState state, IBakedModel existingModel);
 }
