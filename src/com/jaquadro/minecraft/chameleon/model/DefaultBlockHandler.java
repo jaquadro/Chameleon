@@ -1,10 +1,9 @@
-package com.jaquadro.minecraft.chameleon.model;
+/*package com.jaquadro.minecraft.chameleon.model;
 
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.EnumFacing;
-import net.minecraftforge.client.model.ISmartBlockModel;
 
 import java.util.List;
 
@@ -51,3 +50,4 @@ public abstract class DefaultBlockHandler implements ISmartBlockModel
         throw new UnsupportedOperationException();
     }
 }
+*/

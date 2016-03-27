@@ -40,7 +40,7 @@ public class ChamRenderManager
             ChamRender renderer = freeRenderers.pop();
             renderer.setVertexBuffer(buffer);
 
-            if (worldRenderer != null)
+            if (buffer != null)
                 renderers.put(buffer, renderer);
 
             return renderer;
@@ -54,9 +54,9 @@ public class ChamRenderManager
         lock.lock();
 
         try {
-            if (renderer.getWorldRenderer() != null)
-                renderers.remove(renderer.getWorldRenderer());
-            renderer.setWorldRenderer(null);
+            if (renderer.getVertexBuffer() != null)
+                renderers.remove(renderer.getVertexBuffer());
+            renderer.setVertexBuffer(null);
             freeRenderers.push(renderer);
         }
         finally {

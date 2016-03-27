@@ -90,7 +90,7 @@ public class ChamRender
 
     void setVertexBuffer (VertexBuffer buffer) {
         tessellator = buffer;
-        llHelper.setTesseleator(worldRenderer);
+        llHelper.setTessellator(buffer);
     }
 
     VertexBuffer getVertexBuffer () {

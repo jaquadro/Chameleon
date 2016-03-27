@@ -63,7 +63,7 @@ public class ChamRenderLL
     };
 
     private ChamRenderState state;
-    private WorldRenderer tessellator;
+    private VertexBuffer tessellator;
 
     private double[] minUDiv = new double[24];
     private double[] maxUDiv = new double[24];
@@ -136,7 +136,7 @@ public class ChamRenderLL
         return bakedFormat;
     }
 
-    public void setTesseleator (WorldRenderer tessellator) {
+    public void setTessellator (VertexBuffer tessellator) {
         this.tessellator = tessellator;
     }
 

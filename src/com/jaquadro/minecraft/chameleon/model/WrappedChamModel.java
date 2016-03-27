@@ -2,12 +2,10 @@ package com.jaquadro.minecraft.chameleon.model;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.util.EnumFacing;
-import net.minecraftforge.client.model.IFlexibleBakedModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,26 +20,13 @@ public class WrappedChamModel extends ChamModel
     }
 
     @Override
-    public List<BakedQuad> getFaceQuads (EnumFacing facing) {
-        List<BakedQuad> inner = super.getFaceQuads(facing);
+    public List<BakedQuad> getQuads (IBlockState state, EnumFacing facing, long rand) {
+        List<BakedQuad> inner = super.getQuads(state, facing, rand);
         if (inner == null || inner.size() == 0)
-            return model.getFaceQuads(facing);
+            return model.getQuads(state, facing, rand);
 
         List<BakedQuad> combined = new ArrayList<BakedQuad>();
-        combined.addAll(model.getFaceQuads(facing));
-        combined.addAll(inner);
-
-        return combined;
-    }
-
-    @Override
-    public List<BakedQuad> getGeneralQuads () {
-        List<BakedQuad> inner = super.getGeneralQuads();
-        if (inner == null || inner.size() == 0)
-            return model.getGeneralQuads();
-
-        List<BakedQuad> combined = new ArrayList<BakedQuad>();
-        combined.addAll(model.getGeneralQuads());
+        combined.addAll(model.getQuads(state, facing, rand));
         combined.addAll(inner);
 
         return combined;
@@ -50,14 +35,6 @@ public class WrappedChamModel extends ChamModel
     @Override
     public TextureAtlasSprite getParticleTexture () {
         return model.getParticleTexture();
-    }
-
-    @Override
-    public VertexFormat getFormat () {
-        if (model instanceof IFlexibleBakedModel)
-            return ((IFlexibleBakedModel) model).getFormat();
-
-        return super.getFormat();
     }
 
     @Override

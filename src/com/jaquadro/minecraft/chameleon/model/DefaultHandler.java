@@ -1,3 +1,4 @@
+/*
 package com.jaquadro.minecraft.chameleon.model;
 
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -41,3 +42,4 @@ public abstract class DefaultHandler implements ISmartBlockModel, ISmartItemMode
         throw new UnsupportedOperationException();
     }
 }
+*/

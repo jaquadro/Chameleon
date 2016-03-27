@@ -1,3 +1,4 @@
+/*
 package com.jaquadro.minecraft.chameleon.resources.register;
 
 import net.minecraft.block.Block;
@@ -45,3 +46,4 @@ public abstract class SmartHandlerRegister<TBlock extends ISmartBlockModel, TIte
         return itemModel;
     }
 }
+*/

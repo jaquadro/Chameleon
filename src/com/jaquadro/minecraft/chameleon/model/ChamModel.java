@@ -5,8 +5,8 @@ import com.jaquadro.minecraft.chameleon.render.ChamRenderManager;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraftforge.client.MinecraftForgeClient;
 
 import java.lang.reflect.Array;
@@ -26,13 +26,13 @@ public abstract class ChamModel extends BlockModel
     public ChamModel (IBlockState state, boolean mergeLayers, Object... args) {
         if (!mergeLayers) {
             Block block = state.getBlock();
-            if (block.canRenderInLayer(EnumWorldBlockLayer.SOLID))
+            if (block.canRenderInLayer(BlockRenderLayer.SOLID))
                 solidCache = (List[]) Array.newInstance(ArrayList.class, 7);
-            if (block.canRenderInLayer(EnumWorldBlockLayer.CUTOUT))
+            if (block.canRenderInLayer(BlockRenderLayer.CUTOUT))
                 cutoutCache = (List[]) Array.newInstance(ArrayList.class, 7);
-            if (block.canRenderInLayer(EnumWorldBlockLayer.CUTOUT_MIPPED))
+            if (block.canRenderInLayer(BlockRenderLayer.CUTOUT_MIPPED))
                 mippedCache = (List[]) Array.newInstance(ArrayList.class, 7);
-            if (block.canRenderInLayer(EnumWorldBlockLayer.TRANSLUCENT))
+            if (block.canRenderInLayer(BlockRenderLayer.TRANSLUCENT))
                 transCache = (List[]) Array.newInstance(ArrayList.class, 7);
         }
         else
@@ -93,32 +93,22 @@ public abstract class ChamModel extends BlockModel
     }
 
     @Override
-    public List<BakedQuad> getFaceQuads (EnumFacing facing) {
-        switch (MinecraftForgeClient.getRenderLayer()) {
-            case SOLID:
-                return (solidCache != null) ? solidCache[facing.getIndex()] : EMPTY;
-            case CUTOUT:
-                return (cutoutCache != null) ? cutoutCache[facing.getIndex()] : EMPTY;
-            case CUTOUT_MIPPED:
-                return (mippedCache != null) ? mippedCache[facing.getIndex()] : EMPTY;
-            case TRANSLUCENT:
-                return (transCache != null) ? transCache[facing.getIndex()] : EMPTY;
-            default:
-                return EMPTY;
-        }
-    }
+    public List<BakedQuad> getQuads (IBlockState state, EnumFacing facing, long rand) {
+        int index = (facing != null) ? facing.getIndex() : 6;
 
-    @Override
-    public List<BakedQuad> getGeneralQuads () {
-        switch (MinecraftForgeClient.getRenderLayer()) {
+        BlockRenderLayer renderLayer = MinecraftForgeClient.getRenderLayer();
+        if (renderLayer == null)
+            return (solidCache != null) ? solidCache[index] : EMPTY;
+
+        switch (renderLayer) {
             case SOLID:
-                return (solidCache != null) ? solidCache[6] : EMPTY;
+                return (solidCache != null) ? solidCache[index] : EMPTY;
             case CUTOUT:
-                return (cutoutCache != null) ? cutoutCache[6] : EMPTY;
+                return (cutoutCache != null) ? cutoutCache[index] : EMPTY;
             case CUTOUT_MIPPED:
-                return (mippedCache != null) ? mippedCache[6] : EMPTY;
+                return (mippedCache != null) ? mippedCache[index] : EMPTY;
             case TRANSLUCENT:
-                return (transCache != null) ? transCache[6] : EMPTY;
+                return (transCache != null) ? transCache[index] : EMPTY;
             default:
                 return EMPTY;
         }
