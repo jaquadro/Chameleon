@@ -17,7 +17,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.IRegistry;
-import net.minecraftforge.fml.common.registry.GameData;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.tuple.Pair;
@@ -133,7 +132,7 @@ public class ModelRegistry
     }
 
     private static ModelResourceLocation getResourceLocation (IBlockState state) {
-        ResourceLocation loc = GameData.getBlockRegistry().getNameForObject(state.getBlock());
+        ResourceLocation loc = state.getBlock().getRegistryName();
 
         StringBuilder builder = new StringBuilder();
         for (Map.Entry<IProperty<?>, Comparable<?>> entry : state.getProperties().entrySet()) {
@@ -165,8 +164,8 @@ public class ModelRegistry
 
         Block block = Block.getBlockFromItem(item);
         if (block != null)
-            return new ModelResourceLocation(GameData.getBlockRegistry().getNameForObject(block).toString(), "inventory");
+            return new ModelResourceLocation(block.getRegistryName(), "inventory");
         else
-            return new ModelResourceLocation(GameData.getItemRegistry().getNameForObject(item).toString(), "inventory");
+            return new ModelResourceLocation(item.getRegistryName(), "inventory");
     }
 }

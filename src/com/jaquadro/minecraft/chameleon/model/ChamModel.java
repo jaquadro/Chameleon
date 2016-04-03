@@ -26,13 +26,13 @@ public abstract class ChamModel extends BlockModel
     public ChamModel (IBlockState state, boolean mergeLayers, Object... args) {
         if (!mergeLayers) {
             Block block = state.getBlock();
-            if (block.canRenderInLayer(BlockRenderLayer.SOLID))
+            if (block.canRenderInLayer(state, BlockRenderLayer.SOLID))
                 solidCache = (List[]) Array.newInstance(ArrayList.class, 7);
-            if (block.canRenderInLayer(BlockRenderLayer.CUTOUT))
+            if (block.canRenderInLayer(state, BlockRenderLayer.CUTOUT))
                 cutoutCache = (List[]) Array.newInstance(ArrayList.class, 7);
-            if (block.canRenderInLayer(BlockRenderLayer.CUTOUT_MIPPED))
+            if (block.canRenderInLayer(state, BlockRenderLayer.CUTOUT_MIPPED))
                 mippedCache = (List[]) Array.newInstance(ArrayList.class, 7);
-            if (block.canRenderInLayer(BlockRenderLayer.TRANSLUCENT))
+            if (block.canRenderInLayer(state, BlockRenderLayer.TRANSLUCENT))
                 transCache = (List[]) Array.newInstance(ArrayList.class, 7);
         }
         else
