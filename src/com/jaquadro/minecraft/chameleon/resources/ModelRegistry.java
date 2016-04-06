@@ -7,9 +7,7 @@ import com.jaquadro.minecraft.chameleon.resources.register.IUnifiedRegister;
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemMeshDefinition;
-import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelBakery;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -17,6 +15,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.IRegistry;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.tuple.Pair;
@@ -107,22 +106,21 @@ public class ModelRegistry
     }
 
     private void registerItemMapping (Item item, IItemModelRegister register) {
-        RenderItem renderItem = Minecraft.getMinecraft().getRenderItem();
         if (item instanceof IItemMeshResolver)
-            renderItem.getItemModelMesher().register(item, ((IItemMeshResolver) item).getMeshResolver());
+            ModelLoader.setCustomMeshDefinition(item, ((IItemMeshResolver) item).getMeshResolver());
         else if (register != null) {
             for (ItemStack stack : register.getItemVariants())
-                renderItem.getItemModelMesher().register(item, stack.getMetadata(), getResourceLocation(stack));
+                ModelLoader.setCustomModelResourceLocation(item, stack.getMetadata(), getResourceLocation(stack));
         }
         else if (item instanceof IItemMeshMapper) {
             for (Pair<ItemStack, ModelResourceLocation> pair : ((IItemMeshMapper) item).getMeshMappings())
-                renderItem.getItemModelMesher().register(item, pair.getKey().getMetadata(), pair.getValue());
+                ModelLoader.setCustomModelResourceLocation(item, pair.getKey().getMetadata(), pair.getValue());
         }
         else {
             List<ItemStack> variants = new ArrayList<ItemStack>();
             item.getSubItems(item, null, variants);
             for (ItemStack stack : variants)
-                renderItem.getItemModelMesher().register(item, stack.getMetadata(), getResourceLocation(stack));
+                ModelLoader.setCustomModelResourceLocation(item, stack.getMetadata(), getResourceLocation(stack));
         }
     }
 
