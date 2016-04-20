@@ -510,7 +510,7 @@ public class ChamRender
     }
 
     private TextureAtlasSprite getDefaultSprite () {
-        return ((TextureMap) Minecraft.getMinecraft().getTextureManager().getTexture(TextureMap.locationBlocksTexture)).getAtlasSprite("missingno");
+        return ((TextureMap) Minecraft.getMinecraft().getTextureManager().getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE)).getAtlasSprite("missingno");
     }
 
     private void addBlockVertex (double x, double y, double z, double u, double v) {
