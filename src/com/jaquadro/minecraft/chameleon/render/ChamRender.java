@@ -115,7 +115,7 @@ public class ChamRender
     }
 
     public void setRenderBounds (IBlockAccess blockAccess, IBlockState blockState, BlockPos pos) {
-        AxisAlignedBB bound = blockState.getBlock().getBoundingBox(blockState, blockAccess, pos);
+        AxisAlignedBB bound = blockState.getBoundingBox(blockAccess, pos);
         setRenderBounds(bound.minX, bound.minY, bound.minZ, bound.maxX, bound.maxY, bound.maxZ);
     }
 
@@ -336,7 +336,7 @@ public class ChamRender
 
         Block block = blockState.getBlock();
 
-        state.setBrightness(block.getPackedLightmapCoords(blockState, blockAccess, pos));
+        state.setBrightness(blockState.getPackedLightmapCoords(blockAccess, pos));
 
         //calculateBaseColor(colorScratch, block.colorMultiplier(blockAccess, pos));
         state.setColor(COLOR_WHITE);
@@ -503,14 +503,14 @@ public class ChamRender
                 pos = new BlockPos(brightX, brightY, brightZ);
 
             state.setColor(scale * r, scale * g, scale * b);
-            state.setBrightness(blockState.getBlock().getPackedLightmapCoords(blockState, blockAccess, pos));
+            state.setBrightness(blockState.getPackedLightmapCoords(blockAccess, pos));
         }
 
         state.enableAO = false;
     }
 
     private TextureAtlasSprite getDefaultSprite () {
-        return ((TextureMap) Minecraft.getMinecraft().getTextureManager().getTexture(TextureMap.locationBlocksTexture)).getAtlasSprite("missingno");
+        return ((TextureMap) Minecraft.getMinecraft().getTextureManager().getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE)).getAtlasSprite("missingno");
     }
 
     private void addBlockVertex (double x, double y, double z, double u, double v) {
