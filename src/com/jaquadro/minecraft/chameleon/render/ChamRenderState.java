@@ -38,6 +38,7 @@ public class ChamRenderState
     public double renderOffsetY;
     public double renderOffsetZ;
 
+    public boolean autoFlipTexture;
     public boolean flipTexture;
     public boolean renderFromInside;
     public boolean enableAO;
