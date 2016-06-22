@@ -152,13 +152,13 @@ public class ChamRenderLL
                 break;
             case ChamRender.ZNEG:
             case ChamRender.ZPOS:
-                if (state.rotateTransform == ChamRenderState.ROTATE180 || state.rotateTransform == ChamRenderState.ROTATE90)
+                if (state.autoFlipTexture && (state.rotateTransform == ChamRenderState.ROTATE180 || state.rotateTransform == ChamRenderState.ROTATE90))
                     state.flipTexture = !state.flipTexture;
                 drawFaceZ(face, x, y, z, icon);
                 break;
             case ChamRender.XNEG:
             case ChamRender.XPOS:
-                if (state.rotateTransform == ChamRenderState.ROTATE180 || state.rotateTransform == ChamRenderState.ROTATE270)
+                if (state.autoFlipTexture && (state.rotateTransform == ChamRenderState.ROTATE180 || state.rotateTransform == ChamRenderState.ROTATE270))
                     state.flipTexture = !state.flipTexture;
                 drawFaceX(face, x, y, z, icon);
                 break;
