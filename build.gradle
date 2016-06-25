@@ -24,6 +24,15 @@ version = "1.10-2.1.5"
 group= "com.jaquadro.minecraft.chameleon" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "Chameleon"
 
+idea {
+  module.iml.withXml {
+    def atts = it.asNode().component.content.sourceFolder
+      .find { it.@url == 'file://$MODULE_DIR$/resources' }
+      .attributes()
+    atts.put('type', 'java-resource')
+  }
+}
+
 minecraft {
     version = "1.10-12.18.0.1986-1.10.0"
     runDir = "run"
