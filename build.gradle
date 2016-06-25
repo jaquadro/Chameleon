@@ -20,12 +20,12 @@ plugins {
 }
 */
 
-version = "1.9.4-2.1.5"
+version = "1.10-2.1.5"
 group= "com.jaquadro.minecraft.chameleon" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "Chameleon"
 
 minecraft {
-    version = "1.9.4-12.17.0.1910-1.9.4"
+    version = "1.10-12.18.0.1986-1.10.0"
     runDir = "run"
 
     // the mappings can be changed at any time, and must be in the following format.
