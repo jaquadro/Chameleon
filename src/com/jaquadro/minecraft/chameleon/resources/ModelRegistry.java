@@ -140,7 +140,9 @@ public class ModelRegistry
         for (Map.Entry<IProperty, Comparable> entry : state.getProperties().entrySet()) {
             builder.append(entry.getKey().getName() + '=' + entry.getValue().toString() + ',');
         }
-        builder.deleteCharAt(builder.length() - 1);
+
+        if (builder.length() > 0)
+            builder.deleteCharAt(builder.length() - 1);
 
         return new ModelResourceLocation(loc, builder.toString());
     }
