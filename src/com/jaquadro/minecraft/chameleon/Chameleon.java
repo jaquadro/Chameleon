@@ -33,11 +33,13 @@ public class Chameleon
 
     @Mod.EventHandler
     public void preInit (FMLPreInitializationEvent event) {
-        proxy.initSidedResources();
+        MinecraftForge.EVENT_BUS.register(proxy);
+        proxy.preInitSidedResources();
     }
 
     @Mod.EventHandler
     public void init (FMLInitializationEvent event) {
-        MinecraftForge.EVENT_BUS.register(proxy);
+        proxy.initSidedResources();
+
     }
 }

@@ -11,10 +11,13 @@ import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelBakery;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.IRegistry;
+import net.minecraftforge.client.model.ICustomModelLoader;
+import net.minecraftforge.client.model.IModel;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -27,6 +30,8 @@ public class ModelRegistry
 {
     private final Set<IBlockModelRegister> blockRegistry = new HashSet<IBlockModelRegister>();
     private final Set<IItemModelRegister> itemRegistry = new HashSet<IItemModelRegister>();
+
+    public final ChamModelLoader loader = new ChamModelLoader();
 
     public void registerModel (IBlockModelRegister modelRegister) {
         if (modelRegister != null)
@@ -165,5 +170,25 @@ public class ModelRegistry
             return new ModelResourceLocation(block.getRegistryName(), "inventory");
         else
             return new ModelResourceLocation(item.getRegistryName(), "inventory");
+    }
+
+    public class ChamModelLoader implements ICustomModelLoader
+    {
+        @Override
+        public boolean accepts (ResourceLocation modelLocation) {
+            if (!modelLocation.getResourcePath().contains("#"))
+                return false;
+
+            return true;
+        }
+
+        @Override
+        public IModel loadModel (ResourceLocation modelLocation) throws Exception {
+            return null;
+        }
+
+        @Override
+        public void onResourceManagerReload (IResourceManager resourceManager) {
+        }
     }
 }
