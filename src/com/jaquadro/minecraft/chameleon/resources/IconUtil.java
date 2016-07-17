@@ -18,6 +18,7 @@ public class IconUtil
         if (block == null)
             return null;
 
+        @SuppressWarnings("deprecation")
         IBlockState matState = block.getStateFromMeta(stack.getMetadata());
         BlockRendererDispatcher dispatcher = Minecraft.getMinecraft().getBlockRendererDispatcher();
         IBakedModel model = dispatcher.getBlockModelShapes().getModelForState(matState);
