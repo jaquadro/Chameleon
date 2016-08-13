@@ -26,7 +26,7 @@ public class CustomNameData extends TileDataShim implements IWorldNameable
         if (hasCustomName())
             tag.setString("CustomName", customName);
 
-        return null;
+        return tag;
     }
 
     @Override
