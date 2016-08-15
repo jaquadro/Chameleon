@@ -91,21 +91,27 @@ public class ModelRegistry
     }
 
     public void loadModels (IRegistry<ModelResourceLocation, IBakedModel> modelIRegistry) {
+        int defaultBlockId = Block.getIdFromBlock(Blocks.AIR);
+
         for (IBlockModelRegister register : blockRegistry) {
             for (IBlockState state : register.getBlockStates()) {
-                ModelResourceLocation location = getResourceLocation(state);
-                modelIRegistry.putObject(location, register.getModel(state, modelIRegistry.getObject(location)));
+                if (Block.REGISTRY.getIDForObject(state.getBlock()) != defaultBlockId) {
+                    ModelResourceLocation location = getResourceLocation(state);
+                    modelIRegistry.putObject(location, register.getModel(state, modelIRegistry.getObject(location)));
+                }
             }
         }
 
         for (IItemModelRegister register : itemRegistry) {
             Item item = register.getItem();
-            for (ItemStack stack : register.getItemVariants()) {
-                ModelResourceLocation location = getResourceLocation(stack);
-                modelIRegistry.putObject(location, register.getModel(stack, modelIRegistry.getObject(location)));
-            }
+            if (Item.REGISTRY.getNameForObject(item) != null) {
+                for (ItemStack stack : register.getItemVariants()) {
+                    ModelResourceLocation location = getResourceLocation(stack);
+                    modelIRegistry.putObject(location, register.getModel(stack, modelIRegistry.getObject(location)));
+                }
 
-            registerItemMapping(item, register);
+                registerItemMapping(item, register);
+            }
         }
     }
 
