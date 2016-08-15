@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelBakery;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.resources.IResourceManager;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -56,14 +57,14 @@ public class ModelRegistry
     }
 
     public void registerItemVariants (Block block) {
-        if (block != null && Block.blockRegistry.getIDForObject(block) != Block.getIdFromBlock(Blocks.air)) {
+        if (block != null && Block.REGISTRY.getIDForObject(block) != Block.getIdFromBlock(Blocks.AIR)) {
             Item item = Item.getItemFromBlock(block);
             registerItemVariants(item);
         }
     }
 
     public void registerItemVariants (Item item) {
-        if (item != null && Item.itemRegistry.getNameForObject(item) != null) {
+        if (item != null && Item.REGISTRY.getNameForObject(item) != null) {
             registerItemMapping(item);
             if (item instanceof IItemVariantProvider)
                 registerItemVariants(item, (IItemVariantProvider) item);
@@ -73,14 +74,14 @@ public class ModelRegistry
     }
 
     public void registerItemVariants (Item item, IItemVariantProvider provider) {
-        if (item != null && provider != null && Item.itemRegistry.getNameForObject(item) != null) {
+        if (item != null && provider != null && Item.REGISTRY.getNameForObject(item) != null) {
             List<ResourceLocation> variants = ((IItemVariantProvider) item).getItemVariants();
             ModelBakery.registerItemVariants(item, variants.toArray(new ResourceLocation[variants.size()]));
         }
     }
 
     public void registerItemVariants (Item item, IItemMeshMapper mapper) {
-        if (item != null && mapper != null && Item.itemRegistry.getNameForObject(item) != null) {
+        if (item != null && mapper != null && Item.REGISTRY.getNameForObject(item) != null) {
             List<ResourceLocation> variants = new ArrayList<ResourceLocation>();
             for (Pair<ItemStack, ModelResourceLocation> pair : mapper.getMeshMappings())
                 variants.add(pair.getValue());
