@@ -142,7 +142,7 @@ public class ModelRegistry
 
         StringBuilder builder = new StringBuilder();
         for (Map.Entry<IProperty<?>, Comparable<?>> entry : state.getProperties().entrySet()) {
-            builder.append(entry.getKey().getName() + '=' + entry.getValue().toString() + ',');
+            builder.append(entry.getKey().getName()).append('=').append(entry.getValue().toString()).append(',');
         }
 
         if (builder.length() > 0)
