@@ -121,4 +121,9 @@ public class ChamInvTileEntity extends ChamTileEntity implements IInventory, IWo
 
         return emptyInventory.getDisplayName();
     }
+
+    public void setInventoryName (String name) {
+        if (customNameData != null)
+            customNameData.setName(name);
+    }
 }
