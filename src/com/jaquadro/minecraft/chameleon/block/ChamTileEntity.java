@@ -47,16 +47,7 @@ public class ChamTileEntity extends TileEntity
         failureSnapshot = null;
 
         try {
-            if (fixedShims != null) {
-                for (TileDataShim shim : fixedShims)
-                    shim.readFromNBT(tag);
-            }
             readFromFixedNBT(tag);
-
-            if (portableShims != null) {
-                for (TileDataShim shim : portableShims)
-                    shim.readFromNBT(tag);
-            }
             readFromPortableNBT(tag);
         }
         catch (Throwable t) {
@@ -74,16 +65,7 @@ public class ChamTileEntity extends TileEntity
         }
 
         try {
-            if (fixedShims != null) {
-                for (TileDataShim shim : fixedShims)
-                    tag = shim.writeToNBT(tag);
-            }
             tag = writeToFixedNBT(tag);
-
-            if (portableShims != null) {
-                for (TileDataShim shim : portableShims)
-                    tag = shim.writeToNBT(tag);
-            }
             tag = writeToPortableNBT(tag);
         }
         catch (Throwable t) {
@@ -93,15 +75,35 @@ public class ChamTileEntity extends TileEntity
         return tag;
     }
 
-    public void readFromPortableNBT (NBTTagCompound tag) { }
+    public void readFromPortableNBT (NBTTagCompound tag) {
+        if (portableShims != null) {
+            for (TileDataShim shim : portableShims)
+                shim.readFromNBT(tag);
+        }
+    }
 
     public NBTTagCompound writeToPortableNBT (NBTTagCompound tag) {
+        if (portableShims != null) {
+            for (TileDataShim shim : portableShims)
+                tag = shim.writeToNBT(tag);
+        }
+
         return tag;
     }
 
-    protected void readFromFixedNBT (NBTTagCompound tag) { }
+    protected void readFromFixedNBT (NBTTagCompound tag) {
+        if (fixedShims != null) {
+            for (TileDataShim shim : fixedShims)
+                shim.readFromNBT(tag);
+        }
+    }
 
     protected NBTTagCompound writeToFixedNBT (NBTTagCompound tag) {
+        if (fixedShims != null) {
+            for (TileDataShim shim : fixedShims)
+                tag = shim.writeToNBT(tag);
+        }
+
         return tag;
     }
 
@@ -147,12 +149,21 @@ public class ChamTileEntity extends TileEntity
         }
     }
 
-    public void markBlockForUpdate() {
-        IBlockState state = worldObj.getBlockState(pos);
-        worldObj.notifyBlockUpdate(pos, state, state, 3);
+    public void markBlockForUpdate () {
+        if (worldObj != null && !worldObj.isRemote) {
+            IBlockState state = worldObj.getBlockState(pos);
+            worldObj.notifyBlockUpdate(pos, state, state, 3);
+        }
     }
 
-    public void markBlockForRenderUpdate() {
+    public void markBlockForUpdateClient () {
+        if (worldObj != null && worldObj.isRemote) {
+            IBlockState state = worldObj.getBlockState(pos);
+            worldObj.notifyBlockUpdate(pos, state, state, 3);
+        }
+    }
+
+    public void markBlockForRenderUpdate () {
         worldObj.markBlockRangeForRenderUpdate(pos, pos);
     }
 }
