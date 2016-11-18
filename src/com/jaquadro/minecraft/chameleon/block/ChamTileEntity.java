@@ -144,26 +144,26 @@ public class ChamTileEntity extends TileEntity
             readFromNBT(pkt.getNbtCompound());
 
         if (dataPacketRequiresRenderUpdate() && getWorld().isRemote) {
-            IBlockState state = worldObj.getBlockState(getPos());
-            worldObj.notifyBlockUpdate(getPos(), state, state, 3);
+            IBlockState state = getWorld().getBlockState(getPos());
+            getWorld().notifyBlockUpdate(getPos(), state, state, 3);
         }
     }
 
     public void markBlockForUpdate () {
-        if (worldObj != null && !worldObj.isRemote) {
-            IBlockState state = worldObj.getBlockState(pos);
-            worldObj.notifyBlockUpdate(pos, state, state, 3);
+        if (getWorld() != null && !getWorld().isRemote) {
+            IBlockState state = getWorld().getBlockState(pos);
+            getWorld().notifyBlockUpdate(pos, state, state, 3);
         }
     }
 
     public void markBlockForUpdateClient () {
-        if (worldObj != null && worldObj.isRemote) {
-            IBlockState state = worldObj.getBlockState(pos);
-            worldObj.notifyBlockUpdate(pos, state, state, 3);
+        if (getWorld() != null && getWorld().isRemote) {
+            IBlockState state = getWorld().getBlockState(pos);
+            getWorld().notifyBlockUpdate(pos, state, state, 3);
         }
     }
 
     public void markBlockForRenderUpdate () {
-        worldObj.markBlockRangeForRenderUpdate(pos, pos);
+        getWorld().markBlockRangeForRenderUpdate(pos, pos);
     }
 }
