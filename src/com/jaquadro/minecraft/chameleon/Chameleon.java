@@ -11,10 +11,10 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-@Mod(modid = Chameleon.MOD_ID, name = Chameleon.MOD_NAME, version = Chameleon.MOD_VERSION, dependencies = "required-after:Forge@[12.17.0.1908,);", acceptedMinecraftVersions = "[1.9.4,1.11)")
+@Mod(modid = Chameleon.MOD_ID, name = Chameleon.MOD_NAME, version = Chameleon.MOD_VERSION, dependencies = "required-after:Forge@[13.19.0.2148,);", acceptedMinecraftVersions = "[1.11,1.12)")
 public class Chameleon
 {
-    public static final String MOD_ID = "Chameleon";
+    public static final String MOD_ID = "chameleon";
     public static final String MOD_NAME = "Chameleon";
     public static final String MOD_VERSION = "@VERSION@";
     public static final String SOURCE_PATH = "com.jaquadro.minecraft.chameleon.";
