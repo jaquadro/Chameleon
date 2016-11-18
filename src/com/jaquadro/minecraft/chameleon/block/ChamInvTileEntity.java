@@ -29,6 +29,11 @@ public class ChamInvTileEntity extends ChamTileEntity implements IInventory, IWo
         return emptyInventory.getSizeInventory();
     }
 
+    @Override
+    public boolean func_191420_l () {
+        return false;
+    }
+
     @Nullable
     @Override
     public ItemStack getStackInSlot (int index) {
@@ -58,8 +63,8 @@ public class ChamInvTileEntity extends ChamTileEntity implements IInventory, IWo
     }
 
     @Override
-    public boolean isUseableByPlayer (EntityPlayer player) {
-        return emptyInventory.isUseableByPlayer(player);
+    public boolean isUsableByPlayer (EntityPlayer player) {
+        return emptyInventory.isUsableByPlayer(player);
     }
 
     @Override

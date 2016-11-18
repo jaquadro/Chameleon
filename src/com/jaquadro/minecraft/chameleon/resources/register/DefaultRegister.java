@@ -5,6 +5,7 @@ import net.minecraft.block.Block;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -27,7 +28,7 @@ public abstract class DefaultRegister implements IUnifiedRegister
     @Override
     public List<ItemStack> getItemVariants () {
         Item item = getItem();
-        List<ItemStack> variants = new ArrayList<ItemStack>();
+        NonNullList<ItemStack> variants = NonNullList.func_191196_a();
 
         if (item instanceof IItemMeshMapper) {
             for (Pair<ItemStack, ModelResourceLocation> pair : ((IItemMeshMapper) item).getMeshMappings())

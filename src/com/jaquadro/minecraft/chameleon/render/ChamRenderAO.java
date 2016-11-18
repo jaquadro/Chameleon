@@ -126,7 +126,7 @@ public class ChamRenderAO
 
         setupAOBrightnessYPos(blockAccess, blockState, posDown, blocksGrassXYPN, blocksGrassXYNN, blocksGrassYZNP, blocksGrassYZNN);
 
-        float yClamp = MathHelper.clamp_float((float) state.renderMinY, 0, 1);
+        float yClamp = MathHelper.clamp((float) state.renderMinY, 0, 1);
         mixAOBrightnessLightValueY(yClamp, 1 - yClamp);
 
         int blockBrightness = blockState.getPackedLightmapCoords(blockAccess, pos);
@@ -177,7 +177,7 @@ public class ChamRenderAO
 
         setupAOBrightnessYNeg(blockAccess, blockState, posUp, blocksGrassXYPP, blocksGrassXYNP, blocksGrassYZPP, blocksGrassYZPN);
 
-        float yClamp = MathHelper.clamp_float((float) state.renderMaxY, 0, 1);
+        float yClamp = MathHelper.clamp((float) state.renderMaxY, 0, 1);
         mixAOBrightnessLightValueY(yClamp, 1 - yClamp);
 
         int blockBrightness = blockState.getPackedLightmapCoords( blockAccess, pos);
@@ -228,7 +228,7 @@ public class ChamRenderAO
 
         setupAOBrightnessZPos(blockAccess, blockState, posNorth, blocksGrassXZPN, blocksGrassXZNN, blocksGrassYZPN, blocksGrassYZNN);
 
-        float zClamp = MathHelper.clamp_float((float) state.renderMinZ, 0, 1);
+        float zClamp = MathHelper.clamp((float) state.renderMinZ, 0, 1);
         mixAOBrightnessLightValueZ(zClamp, 1 - zClamp);
 
         int blockBrightness = blockState.getPackedLightmapCoords(blockAccess, pos);
@@ -279,7 +279,7 @@ public class ChamRenderAO
 
         setupAOBrightnessZNeg(blockAccess, blockState, posSouth, blocksGrassXZPP, blocksGrassXZNP, blocksGrassYZPP, blocksGrassYZNP);
 
-        float zClamp = MathHelper.clamp_float((float) state.renderMaxZ, 0, 1);
+        float zClamp = MathHelper.clamp((float) state.renderMaxZ, 0, 1);
         mixAOBrightnessLightValueZ(zClamp, 1 - zClamp);
 
         int blockBrightness = blockState.getPackedLightmapCoords(blockAccess, pos);
@@ -330,7 +330,7 @@ public class ChamRenderAO
 
         setupAOBrightnessXPos(blockAccess, blockState, posWest, blocksGrassXYNP, blocksGrassXYNN, blocksGrassXZNN, blocksGrassXZNP);
 
-        float xClamp = MathHelper.clamp_float((float) state.renderMinX, 0, 1);
+        float xClamp = MathHelper.clamp((float) state.renderMinX, 0, 1);
         mixAOBrightnessLightValueX(xClamp, 1 - xClamp);
 
         int blockBrightness = blockState.getPackedLightmapCoords(blockAccess, pos);
@@ -381,7 +381,7 @@ public class ChamRenderAO
 
         setupAOBrightnessXNeg(blockAccess, blockState, posEast, blocksGrassXYNP, blocksGrassXYNN, blocksGrassXZNN, blocksGrassXZNP);
 
-        float xClamp = MathHelper.clamp_float((float) state.renderMaxX, 0, 1);
+        float xClamp = MathHelper.clamp((float) state.renderMaxX, 0, 1);
         mixAOBrightnessLightValueX(xClamp, 1 - xClamp);
 
         int blockBrightness = blockState.getPackedLightmapCoords(blockAccess, pos);

@@ -15,6 +15,7 @@ import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.IRegistry;
 import net.minecraftforge.client.model.ICustomModelLoader;
@@ -131,7 +132,7 @@ public class ModelRegistry
                 ModelLoader.setCustomModelResourceLocation(item, pair.getKey().getMetadata(), pair.getValue());
         }
         else {
-            List<ItemStack> variants = new ArrayList<ItemStack>();
+            NonNullList<ItemStack> variants = NonNullList.func_191196_a();
             item.getSubItems(item, null, variants);
             for (ItemStack stack : variants)
                 ModelLoader.setCustomModelResourceLocation(item, stack.getMetadata(), getResourceLocation(stack));

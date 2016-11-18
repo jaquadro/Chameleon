@@ -6,6 +6,7 @@ import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.tuple.Pair;
@@ -40,7 +41,7 @@ public class ChamMultiItem<T extends Enum<T> & IItemEnum> extends Item implement
 
     @Override
     @SideOnly(Side.CLIENT)
-    public void getSubItems (Item item, CreativeTabs creativeTabs, List<ItemStack> list) {
+    public void getSubItems (Item item, CreativeTabs creativeTabs, NonNullList<ItemStack> list) {
         for (T entry : clazz.getEnumConstants())
             list.add(new ItemStack(item, 1, entry.getMetadata()));
     }
