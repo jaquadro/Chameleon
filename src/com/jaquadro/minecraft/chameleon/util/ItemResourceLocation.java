@@ -5,7 +5,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.oredict.OreDictionary;
-import scala.actors.threadpool.Arrays;
 
 import javax.annotation.Nonnull;
 
@@ -79,7 +78,9 @@ public class ItemResourceLocation extends ResourceLocation
                 return parts;
             case 3:
             default:
-                return (String[])Arrays.copyOfRange(parts, 0, 2);
+                String[] arr2 = new String[2];
+                System.arraycopy(parts, 0, arr2, 0, 2);
+                return arr2;
         }
     }
 
