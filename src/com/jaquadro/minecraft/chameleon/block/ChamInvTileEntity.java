@@ -30,8 +30,8 @@ public class ChamInvTileEntity extends ChamTileEntity implements IInventory, IWo
     }
 
     @Override
-    public boolean func_191420_l () {
-        return false;
+    public boolean isEmpty () {
+        return true;
     }
 
     @Nullable

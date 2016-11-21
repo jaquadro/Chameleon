@@ -28,7 +28,7 @@ public abstract class DefaultRegister implements IUnifiedRegister
     @Override
     public List<ItemStack> getItemVariants () {
         Item item = getItem();
-        NonNullList<ItemStack> variants = NonNullList.func_191196_a();
+        NonNullList<ItemStack> variants = NonNullList.create();
 
         if (item instanceof IItemMeshMapper) {
             for (Pair<ItemStack, ModelResourceLocation> pair : ((IItemMeshMapper) item).getMeshMappings())

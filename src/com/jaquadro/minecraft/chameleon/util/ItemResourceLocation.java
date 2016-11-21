@@ -7,6 +7,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.oredict.OreDictionary;
 import scala.actors.threadpool.Arrays;
 
+import javax.annotation.Nonnull;
+
 public class ItemResourceLocation extends ResourceLocation
 {
     private final int metadata;
@@ -33,6 +35,7 @@ public class ItemResourceLocation extends ResourceLocation
         return metadata;
     }
 
+    @Nonnull
     public ItemStack getItemStack () {
         Item item = Item.getByNameOrId(super.toString());
         if (item == null) {
@@ -42,7 +45,7 @@ public class ItemResourceLocation extends ResourceLocation
         }
 
         if (item == null)
-            return null;
+            return ItemStack.EMPTY;
 
         return new ItemStack(item, 1, metadata);
     }

@@ -65,7 +65,7 @@ public class ModelRegistry
     }
 
     public void registerItemVariants (Item item) {
-        if (item != null && Item.REGISTRY.getNameForObject(item) != null) {
+        if (item != null && item.getRegistryName() != null) {
             registerItemMapping(item);
             if (item instanceof IItemVariantProvider)
                 registerItemVariants(item, (IItemVariantProvider) item);
@@ -75,14 +75,14 @@ public class ModelRegistry
     }
 
     public void registerItemVariants (Item item, IItemVariantProvider provider) {
-        if (item != null && provider != null && Item.REGISTRY.getNameForObject(item) != null) {
+        if (item != null && provider != null && item.getRegistryName() != null) {
             List<ResourceLocation> variants = ((IItemVariantProvider) item).getItemVariants();
             ModelBakery.registerItemVariants(item, variants.toArray(new ResourceLocation[variants.size()]));
         }
     }
 
     public void registerItemVariants (Item item, IItemMeshMapper mapper) {
-        if (item != null && mapper != null && Item.REGISTRY.getNameForObject(item) != null) {
+        if (item != null && mapper != null && item.getRegistryName() != null) {
             List<ResourceLocation> variants = new ArrayList<ResourceLocation>();
             for (Pair<ItemStack, ModelResourceLocation> pair : mapper.getMeshMappings())
                 variants.add(pair.getValue());
@@ -105,7 +105,7 @@ public class ModelRegistry
 
         for (IItemModelRegister register : itemRegistry) {
             Item item = register.getItem();
-            if (Item.REGISTRY.getNameForObject(item) != null) {
+            if (item.getRegistryName() != null) {
                 for (ItemStack stack : register.getItemVariants()) {
                     ModelResourceLocation location = getResourceLocation(stack);
                     modelIRegistry.putObject(location, register.getModel(stack, modelIRegistry.getObject(location)));
@@ -132,7 +132,7 @@ public class ModelRegistry
                 ModelLoader.setCustomModelResourceLocation(item, pair.getKey().getMetadata(), pair.getValue());
         }
         else {
-            NonNullList<ItemStack> variants = NonNullList.func_191196_a();
+            NonNullList<ItemStack> variants = NonNullList.create();
             item.getSubItems(item, null, variants);
             for (ItemStack stack : variants)
                 ModelLoader.setCustomModelResourceLocation(item, stack.getMetadata(), getResourceLocation(stack));
@@ -178,7 +178,7 @@ public class ModelRegistry
         }
 
         Block block = Block.getBlockFromItem(item);
-        if (block != null)
+        if (block != Blocks.AIR)
             return new ModelResourceLocation(block.getRegistryName(), "inventory");
         else
             return new ModelResourceLocation(item.getRegistryName(), "inventory");
