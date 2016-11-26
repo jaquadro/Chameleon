@@ -149,6 +149,9 @@ public class ChamTileEntity extends TileEntity
         }
     }
 
+    /**
+     * Calls server to sync data with client, update neighbors, and cause a delayed render update.
+     */
     public void markBlockForUpdate () {
         if (getWorld() != null && !getWorld().isRemote) {
             IBlockState state = getWorld().getBlockState(pos);
@@ -163,7 +166,19 @@ public class ChamTileEntity extends TileEntity
         }
     }
 
+    /**
+     * Causes immediate render update when called client-side, or delayed render update when called server-side.
+     * Does not sync tile data or notify neighbors of any state change.
+     */
     public void markBlockForRenderUpdate () {
-        getWorld().markBlockRangeForRenderUpdate(pos, pos);
+        if (getWorld() == null)
+            return;
+
+        if (getWorld().isRemote)
+            getWorld().markBlockRangeForRenderUpdate(pos, pos);
+        else {
+            IBlockState state = getWorld().getBlockState(pos);
+            getWorld().notifyBlockUpdate(pos, state, state, 2);
+        }
     }
 }

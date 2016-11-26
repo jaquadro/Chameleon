@@ -1,10 +1,13 @@
 package com.jaquadro.minecraft.chameleon.model;
 
+import com.jaquadro.minecraft.chameleon.Chameleon;
 import com.jaquadro.minecraft.chameleon.render.ChamRender;
 import com.jaquadro.minecraft.chameleon.render.ChamRenderManager;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.client.MinecraftForgeClient;
@@ -24,6 +27,9 @@ public abstract class ChamModel extends BlockModel
 
     @SuppressWarnings("unchecked")
     public ChamModel (IBlockState state, boolean mergeLayers, Object... args) {
+        if (state == null)
+            return;
+
         if (!mergeLayers) {
             Block block = state.getBlock();
             if (block.canRenderInLayer(state, BlockRenderLayer.SOLID))
@@ -130,5 +136,17 @@ public abstract class ChamModel extends BlockModel
         cache[6] = renderer.takeBakedQuads(null);
         for (EnumFacing facing : EnumFacing.VALUES)
             cache[facing.getIndex()] = renderer.takeBakedQuads(facing);
+    }
+
+    public static class NullModel extends ChamModel {
+
+        public NullModel () {
+            super(null, true);
+        }
+
+        @Override
+        public TextureAtlasSprite getParticleTexture () {
+            return Chameleon.instance.iconRegistry.getIcon(TextureMap.LOCATION_MISSING_TEXTURE);
+        }
     }
 }
