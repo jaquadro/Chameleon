@@ -16,12 +16,12 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-public class CachedChamModel implements IBakedModel
+public class CachedBuilderModel implements IBakedModel
 {
     LoadingCache<KeyedBlockState, IBakedModel> modelCache;
     private ProxyBuilderModel model;
 
-    public CachedChamModel (final ProxyBuilderModel model) {
+    public CachedBuilderModel (final ProxyBuilderModel model) {
         this.model = model;
         modelCache = CacheBuilder.newBuilder().build(new CacheLoader<KeyedBlockState, IBakedModel>()
         {
