@@ -11,11 +11,11 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class DefaultRegister implements IUnifiedRegister
+public abstract class DefaultRegister<T extends Block> implements IUnifiedRegister
 {
-    private final Block block;
+    private final T block;
 
-    public DefaultRegister (Block block) {
+    public DefaultRegister (T block) {
         this.block = block;
     }
 
@@ -42,5 +42,9 @@ public abstract class DefaultRegister implements IUnifiedRegister
     @Override
     public List<ResourceLocation> getTextureResources () {
         return new ArrayList<ResourceLocation>();
+    }
+
+    public T getBlock () {
+        return block;
     }
 }

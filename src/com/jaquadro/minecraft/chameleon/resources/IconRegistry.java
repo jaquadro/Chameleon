@@ -16,7 +16,7 @@ public class IconRegistry
     private final Map<ResourceLocation, TextureAtlasSprite> icons = new HashMap<ResourceLocation, TextureAtlasSprite>();
 
     public void registerIcon (ResourceLocation location) {
-        if (location != null)
+        if (location != null && !resources.contains(location))
             resources.add(location);
     }
 

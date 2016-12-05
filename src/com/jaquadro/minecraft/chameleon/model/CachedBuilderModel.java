@@ -19,10 +19,17 @@ import java.util.concurrent.ExecutionException;
 public class CachedBuilderModel implements IBakedModel
 {
     LoadingCache<KeyedBlockState, IBakedModel> modelCache;
+    private IBlockState baseState;
     private ProxyBuilderModel model;
 
     public CachedBuilderModel (final ProxyBuilderModel model) {
+        this(model, null);
+    }
+
+    public CachedBuilderModel (final ProxyBuilderModel model, IBlockState baseState) {
         this.model = model;
+        this.baseState = baseState;
+
         modelCache = CacheBuilder.newBuilder().build(new CacheLoader<KeyedBlockState, IBakedModel>()
         {
             @Override
@@ -34,42 +41,52 @@ public class CachedBuilderModel implements IBakedModel
 
     @Override
     public List<BakedQuad> getQuads (@Nullable IBlockState state, @Nullable EnumFacing side, long rand) {
-        try {
-            IBakedModel cmodel = modelCache.get(new KeyedBlockState(state, model.getKey(state)));
-            return cmodel.getQuads(state, side, rand);
-        }
-        catch (ExecutionException e) {
-            return ImmutableList.of();
-        }
+        return getModel(state).getQuads(state, side, rand);
     }
 
     @Override
     public boolean isAmbientOcclusion () {
-        return model.isAmbientOcclusion();
+        return getModel().isAmbientOcclusion();
     }
 
     @Override
     public boolean isGui3d () {
-        return model.isGui3d();
+        return getModel().isGui3d();
     }
 
     @Override
     public boolean isBuiltInRenderer () {
-        return model.isBuiltInRenderer();
+        return getModel().isBuiltInRenderer();
     }
 
     @Override
     public TextureAtlasSprite getParticleTexture () {
-        return model.getParticleTexture();
+        return getModel().getParticleTexture();
     }
 
     @Override
     public ItemCameraTransforms getItemCameraTransforms () {
-        return model.getItemCameraTransforms();
+        return getModel().getItemCameraTransforms();
     }
 
     @Override
     public ItemOverrideList getOverrides () {
-        return model.getOverrides();
+        return getModel().getOverrides();
+    }
+
+    private IBakedModel getModel () {
+        return getModel(baseState);
+    }
+
+    private IBakedModel getModel (IBlockState state) {
+        try {
+            if (state == null)
+                return model;
+
+            return modelCache.get(new KeyedBlockState(state, model.getKey(state)));
+        }
+        catch (Exception e) {
+            return model;
+        }
     }
 }

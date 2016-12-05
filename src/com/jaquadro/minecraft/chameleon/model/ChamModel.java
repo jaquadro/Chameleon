@@ -20,6 +20,7 @@ public abstract class ChamModel extends BlockModel
 {
     private static final List<BakedQuad> EMPTY = new ArrayList<BakedQuad>(0);
 
+    private IBlockState state;
     private List<BakedQuad>[] solidCache;
     private List<BakedQuad>[] cutoutCache;
     private List<BakedQuad>[] mippedCache;
@@ -27,6 +28,7 @@ public abstract class ChamModel extends BlockModel
 
     @SuppressWarnings("unchecked")
     public ChamModel (IBlockState state, boolean mergeLayers, Object... args) {
+        this.state = state;
         if (state == null)
             return;
 
@@ -96,6 +98,10 @@ public abstract class ChamModel extends BlockModel
 
         renderEnd(renderer, state, args);
         ChamRenderManager.instance.releaseRenderer(renderer);
+    }
+
+    public IBlockState getState () {
+        return state;
     }
 
     @Override
