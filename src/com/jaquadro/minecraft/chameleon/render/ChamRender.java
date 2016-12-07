@@ -169,9 +169,9 @@ public class ChamRender
     }
 
     public void renderFaceColorMult (EnumFacing face, IBlockAccess blockAccess, IBlockState blockState, BlockPos pos, TextureAtlasSprite icon, float r, float g, float b) {
+        face = EnumFacing.getFront(ChamRenderState.FACE_BY_FACE_ROTATION[face.getIndex()][state.rotateTransform]);
         setupColorMult(face, blockAccess, blockState, pos, r, g, b);
 
-        face = EnumFacing.getFront(ChamRenderState.FACE_BY_FACE_ROTATION[face.getIndex()][state.rotateTransform]);
         llHelper.drawFace(face, pos.getX(), pos.getY(), pos.getZ(), icon, drawToFaceGroup);
 
         if (blockAccess == null && !llHelper.isBaking())
@@ -185,10 +185,11 @@ public class ChamRender
 
     public void bakeFace (EnumFacing face, IBlockState blockState, TextureAtlasSprite icon, boolean isFaceGroup, float r, float g, float b) {
         float scale = state.getColorMult(face);
+        face = EnumFacing.getFront(ChamRenderState.FACE_BY_FACE_ROTATION[face.getIndex()][state.rotateTransform]);
+
         state.setColor(r * scale, g * scale, b * scale);
         state.setNormal(normMap[face.getIndex()]);
 
-        face = EnumFacing.getFront(ChamRenderState.FACE_BY_FACE_ROTATION[face.getIndex()][state.rotateTransform]);
         llHelper.drawFace(face, 0, 0, 0, icon, isFaceGroup);
     }
     
@@ -258,10 +259,11 @@ public class ChamRender
 
     public void bakePartialFace (EnumFacing face, IBlockState blockState, TextureAtlasSprite icon, double uMin, double vMin, double uMax, double vMax, boolean isFaceGroup, float r, float g, float b) {
         float scale = state.getColorMult(face);
+        face = EnumFacing.getFront(ChamRenderState.FACE_BY_FACE_ROTATION[face.getIndex()][state.rotateTransform]);
+
         state.setColor(r * scale, g * scale, b * scale);
         state.setNormal(normMap[face.getIndex()]);
 
-        face = EnumFacing.getFront(ChamRenderState.FACE_BY_FACE_ROTATION[face.getIndex()][state.rotateTransform]);
         llHelper.drawPartialFace(face, 0, 0, 0, icon, uMin, vMin, uMax, vMax, isFaceGroup);
     }
 

@@ -1,5 +1,6 @@
 package com.jaquadro.minecraft.chameleon.resources;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.util.ResourceLocation;
@@ -15,7 +16,7 @@ public class IconRegistry
     private final Map<ResourceLocation, TextureAtlasSprite> icons = new HashMap<ResourceLocation, TextureAtlasSprite>();
 
     public void registerIcon (ResourceLocation location) {
-        if (location != null)
+        if (location != null && !resources.contains(location))
             resources.add(location);
     }
 
@@ -23,7 +24,11 @@ public class IconRegistry
         if (location == null)
             return null;
 
-        return icons.get(location);
+        TextureAtlasSprite icon = icons.get(location);
+        if (icon != null)
+            return icon;
+
+        return Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(location.toString());
     }
 
     public void loadIcons (TextureMap iconRegistry) {
