@@ -58,8 +58,8 @@ public class ChamInvTileEntity extends ChamTileEntity implements IInventory, IWo
     }
 
     @Override
-    public boolean isUseableByPlayer (EntityPlayer player) {
-        return emptyInventory.isUseableByPlayer(player);
+    public boolean isUsableByPlayer (EntityPlayer player) {
+        return emptyInventory.isUsableByPlayer(player);
     }
 
     @Override

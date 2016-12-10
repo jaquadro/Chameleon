@@ -759,9 +759,9 @@ public class ChamRenderLL
     }
 
     private int packColor (float[] color) {
-        int r = MathHelper.clamp_int((int)(color[0] * 255), 0, 255);
-        int g = MathHelper.clamp_int((int)(color[1] * 255), 0, 255);
-        int b = MathHelper.clamp_int((int)(color[2] * 255), 0, 255);
+        int r = MathHelper.clamp((int)(color[0] * 255), 0, 255);
+        int g = MathHelper.clamp((int)(color[1] * 255), 0, 255);
+        int b = MathHelper.clamp((int)(color[2] * 255), 0, 255);
 
         return (255 << 24 | r << 16 | g << 8 | b);
     }
