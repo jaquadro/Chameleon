@@ -18,6 +18,7 @@ public abstract class ProxyBuilderModel implements IBakedModel
 
     private IBakedModel parent;
     private IBakedModel proxy;
+    private IBlockState stateCache;
     private TextureAtlasSprite iconParticle;
 
     public ProxyBuilderModel (TextureAtlasSprite iconParticle) {
@@ -30,7 +31,7 @@ public abstract class ProxyBuilderModel implements IBakedModel
 
     @Override
     public List<BakedQuad> getQuads (IBlockState state, EnumFacing side, long rand) {
-        if (proxy == null)
+        if (proxy == null || stateCache != state)
             setProxy(state);
 
         if (proxy == null)
@@ -86,6 +87,7 @@ public abstract class ProxyBuilderModel implements IBakedModel
     }
 
     private void setProxy (IBlockState state) {
+        stateCache = state;
         if (state == null)
             proxy = parent;
         else
