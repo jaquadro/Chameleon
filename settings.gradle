@@ -1,1 +1,1 @@
-rootProject.name = "Chameleon-1.11"
+rootProject.name = "Chameleon-${minecraft_base_version}"

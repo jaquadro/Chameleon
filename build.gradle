@@ -12,9 +12,10 @@ buildscript {
 
 apply plugin: 'net.minecraftforge.gradle.forge'
 
-version = "1.11.2-3.0.2"
+version = "${minecraft_version}-${mod_version}"
 group= "com.jaquadro.minecraft.chameleon" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "Chameleon"
+
 
 idea {
   module.iml.withXml {
@@ -31,7 +32,7 @@ compileJava {
 }
 
 minecraft {
-    version = "13.20.0.2252"
+    version = forge_version
     runDir = "run"
 
     // the mappings can be changed at any time, and must be in the following format.
@@ -39,7 +40,7 @@ minecraft {
     // stable_#            stables are built at the discretion of the MCP team.
     // Use non-default mappings at your own risk. they may not allways work.
     // simply re-run your setup task after changing the mappings to update your workspace.
-    mappings = "snapshot_20170214"
+    mappings = forge_mappings
 
     replace '@VERSION@', project.version
 }
