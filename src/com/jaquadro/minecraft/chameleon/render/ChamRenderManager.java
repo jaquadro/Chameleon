@@ -1,6 +1,6 @@
 package com.jaquadro.minecraft.chameleon.render;
 
-import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.WorldVertexBufferUploader;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
@@ -17,7 +17,7 @@ public class ChamRenderManager
 
     private WorldVertexBufferUploader vboUploader = new WorldVertexBufferUploader();
     private Stack<ChamRender> freeRenderers = new Stack<ChamRender>();
-    private Map<VertexBuffer, ChamRender> renderers = new HashMap<VertexBuffer, ChamRender>();
+    private Map<BufferBuilder, ChamRender> renderers = new HashMap<BufferBuilder, ChamRender>();
 
     public static final ChamRenderManager instance = new ChamRenderManager();
 
@@ -25,7 +25,7 @@ public class ChamRenderManager
         lock = new ReentrantLock();
     }
 
-    public ChamRender getRenderer (VertexBuffer buffer) {
+    public ChamRender getRenderer (BufferBuilder buffer) {
         lock.lock();
 
         try {
@@ -64,11 +64,11 @@ public class ChamRenderManager
         }
     }
 
-    public ChamRender startDrawing (VertexBuffer buffer) {
+    public ChamRender startDrawing (BufferBuilder buffer) {
         return startDrawing(buffer, DefaultVertexFormats.ITEM);
     }
 
-    public ChamRender startDrawing (VertexBuffer buffer, VertexFormat format) {
+    public ChamRender startDrawing (BufferBuilder buffer, VertexFormat format) {
         ChamRender renderer = getRenderer(buffer);
         try {
             buffer.begin(GL11.GL_QUADS, format);
@@ -82,7 +82,7 @@ public class ChamRenderManager
         lock.lock();
 
         try {
-            VertexBuffer worldRenderer = renderer.getVertexBuffer();
+            BufferBuilder worldRenderer = renderer.getVertexBuffer();
             if (worldRenderer == null)
                 return;
 

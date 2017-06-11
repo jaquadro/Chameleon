@@ -5,7 +5,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
@@ -48,7 +48,7 @@ public class ChamRender
         { 1, 0, 0 },
     };
 
-    private VertexBuffer tessellator;
+    private BufferBuilder tessellator;
 
     public ChamRenderState state = new ChamRenderState();
 
@@ -88,12 +88,12 @@ public class ChamRender
         target[2] = source[2] * scale;
     }
 
-    void setVertexBuffer (VertexBuffer buffer) {
+    void setVertexBuffer (BufferBuilder buffer) {
         tessellator = buffer;
         llHelper.setTessellator(buffer);
     }
 
-    VertexBuffer getVertexBuffer () {
+    BufferBuilder getVertexBuffer () {
         return tessellator;
     }
 

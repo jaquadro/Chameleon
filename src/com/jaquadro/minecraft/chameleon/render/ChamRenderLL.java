@@ -1,7 +1,7 @@
 package com.jaquadro.minecraft.chameleon.render;
 
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -63,7 +63,7 @@ public class ChamRenderLL
     };
 
     private ChamRenderState state;
-    private VertexBuffer tessellator;
+    private BufferBuilder tessellator;
 
     private double[] minUDiv = new double[24];
     private double[] maxUDiv = new double[24];
@@ -136,7 +136,7 @@ public class ChamRenderLL
         return bakedFormat;
     }
 
-    public void setTessellator (VertexBuffer tessellator) {
+    public void setTessellator (BufferBuilder tessellator) {
         this.tessellator = tessellator;
     }
 
