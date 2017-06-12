@@ -35,7 +35,7 @@ public abstract class DefaultRegister<T extends Block> implements IUnifiedRegist
                 variants.add(pair.getKey());
         }
         else
-            item.getSubItems(null, variants);
+            item.getSubItems(item.getCreativeTab(), variants);
 
         return variants;
     }

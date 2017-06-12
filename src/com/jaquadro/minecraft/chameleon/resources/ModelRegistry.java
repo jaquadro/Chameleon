@@ -133,7 +133,7 @@ public class ModelRegistry
         }
         else {
             NonNullList<ItemStack> variants = NonNullList.create();
-            item.getSubItems(null, variants);
+            item.getSubItems(item.getCreativeTab(), variants);
             for (ItemStack stack : variants)
                 ModelLoader.setCustomModelResourceLocation(item, stack.getMetadata(), getResourceLocation(stack));
         }
