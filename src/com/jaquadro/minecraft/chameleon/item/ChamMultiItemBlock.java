@@ -4,14 +4,13 @@ import com.jaquadro.minecraft.chameleon.resources.IItemEnum;
 import com.jaquadro.minecraft.chameleon.resources.IItemMeshMapper;
 import com.jaquadro.minecraft.chameleon.resources.IItemVariantProvider;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockPlanks;
 import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.registry.GameData;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
@@ -60,7 +59,7 @@ public class ChamMultiItemBlock<T extends Enum<T> & IItemEnum> extends ItemBlock
 
     @Override
     public List<ResourceLocation> getItemVariants () {
-        ResourceLocation location = GameData.getItemRegistry().getNameForObject(this);
+        ResourceLocation location = ForgeRegistries.ITEMS.getKey(this);
         List<ResourceLocation> variants = new ArrayList<ResourceLocation>();
 
         for (T entry : clazz.getEnumConstants())
