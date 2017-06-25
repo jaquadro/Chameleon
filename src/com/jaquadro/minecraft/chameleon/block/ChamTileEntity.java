@@ -69,7 +69,7 @@ public class ChamTileEntity extends TileEntity
             tag = writeToPortableNBT(tag);
         }
         catch (Throwable t) {
-            FMLLog.log(Chameleon.MOD_ID, Level.ERROR, t, "Tile Save Failure.");
+            Chameleon.log.error("Tile Save Failure.", t);
         }
 
         return tag;
@@ -109,7 +109,7 @@ public class ChamTileEntity extends TileEntity
 
     private void trapLoadFailure (Throwable t, NBTTagCompound tag) {
         failureSnapshot = tag.copy();
-        FMLLog.log(Chameleon.MOD_ID, Level.ERROR, t, "Tile Load Failure.");
+        Chameleon.log.error("Tile Load Failure.", t);
     }
 
     private void restoreLoadFailure (NBTTagCompound tag) {

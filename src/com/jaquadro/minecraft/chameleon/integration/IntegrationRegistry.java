@@ -1,5 +1,6 @@
 package com.jaquadro.minecraft.chameleon.integration;
 
+import com.jaquadro.minecraft.chameleon.Chameleon;
 import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.fml.common.Loader;
 import org.apache.logging.log4j.Level;
@@ -35,7 +36,7 @@ public class IntegrationRegistry
             }
             catch (Throwable t) {
                 registry.remove(i--);
-                FMLLog.log(modId, Level.INFO, "Could not load integration module: " + module.getClass().getName());
+                Chameleon.log.info("Could not load integration module: " + module.getClass().getName());
             }
         }
     }
