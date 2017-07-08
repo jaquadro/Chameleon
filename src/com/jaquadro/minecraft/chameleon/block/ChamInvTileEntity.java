@@ -25,6 +25,13 @@ public class ChamInvTileEntity extends ChamTileEntity implements IInventory, IWo
     }
 
     @Override
+    public void injectPortableData (TileDataShim shim) {
+        super.injectPortableData(shim);
+        if (shim instanceof CustomNameData)
+            customNameData = (CustomNameData)shim;
+    }
+
+    @Override
     public int getSizeInventory () {
         return emptyInventory.getSizeInventory();
     }
