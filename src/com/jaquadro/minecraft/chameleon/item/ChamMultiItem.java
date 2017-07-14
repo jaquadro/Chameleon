@@ -42,8 +42,10 @@ public class ChamMultiItem<T extends Enum<T> & IItemEnum> extends Item implement
     @Override
     @SideOnly(Side.CLIENT)
     public void getSubItems (CreativeTabs creativeTabs, NonNullList<ItemStack> list) {
-        for (T entry : clazz.getEnumConstants())
-            list.add(new ItemStack(this, 1, entry.getMetadata()));
+        if (isInCreativeTab(creativeTabs)) {
+            for (T entry : clazz.getEnumConstants())
+                list.add(new ItemStack(this, 1, entry.getMetadata()));
+        }
     }
 
     @Override
