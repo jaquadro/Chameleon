@@ -28,6 +28,7 @@ public class ChamMultiItemBlock<T extends Enum<T> & IItemEnum> extends ItemBlock
         this.property = property;
         this.clazz = clazz;
         this.metaLookup = metaLookup;
+        this.setRegistryName(block.getRegistryName());
 
         setMaxDamage(0);
         setHasSubtypes(true);

@@ -1,7 +1,10 @@
 package com.jaquadro.minecraft.chameleon.block.tiledata;
 
+import net.minecraft.client.resources.I18n;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.IWorldNameable;
 import net.minecraftforge.common.util.Constants;
 
@@ -41,7 +44,7 @@ public class CustomNameData extends TileDataShim implements IWorldNameable
 
     @Override
     public ITextComponent getDisplayName () {
-        return null;
+        return hasCustomName() ? new TextComponentString(customName) : new TextComponentTranslation(defaultName);
     }
 
     public void setName (String name) {
