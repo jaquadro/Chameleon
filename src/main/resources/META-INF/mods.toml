@@ -1,0 +1,27 @@
+modLoader="javafml"
+loaderVersion="[24,)"
+issueTrackerURL="https://github.com/jaquadro/Chameleon/issues"
+displayURL="https://minecraft.curseforge.com/projects/chameleon"
+authors="Texelsaur"
+
+[[mods]]
+    modId="chameleon"
+    version="${version}"
+    displayName="Chameleon"
+    description='''
+    Shared code and render support for mods.  Used by jaquadro's mods.
+    '''
+
+[[dependencies.chameleon]]
+    modId="forge"
+    mandatory=true
+    versionRange="[28,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.chameleon]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.14,)"
+    ordering="NONE"
+    side="BOTH"
